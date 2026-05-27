@@ -1,0 +1,32 @@
+project:
+  type: default
+  output-dir: _site
+  render:
+    - relatorio_ipca.qmd
+
+lang: pt
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-depth: 3
+    toc-title: "Sumário"
+    toc-location: left
+    number-sections: true
+    code-fold: true
+    code-summary: "Ver código"
+    code-tools: true
+    fig-width: 9
+    fig-height: 5
+    fig-dpi: 150
+    fig-align: center
+    embed-resources: true
+    smooth-scroll: true
+
+execute:
+  freeze: auto
+  echo: true
+  warning: false
+  message: false
+  cache: false
