@@ -15,11 +15,12 @@ renv/lock/          # manter se usar renv; remova esta linha nesse caso
 .Rprofile           # idem
 
 # ── Quarto ────────────────────────────────────────────────────────────────────
-_site/              # HTML renderizado — gerado em build
+_site/              # pasta de saída legada (não usada mais)
 _freeze/            # cache de execução (freeze: auto)
 .quarto/            # cache interno do Quarto
 *.knit.md
 *.utf8.md
+# docs/ é rastreado — contém o HTML para GitHub Pages / Posit Connect
 
 # Arquivos temporários de render
 *_files/
@@ -37,3 +38,6 @@ tmp_rpath.qmd
 tmp_rpath.html
 tmp_rpath_files/
 instalar_pacotes.R
+
+/.quarto/
+**/*.quarto_ipynb
