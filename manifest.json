@@ -5,7 +5,7 @@
   "metadata": {
     "appmode": "quarto-static",
     "primary_rmd": "relatorio_ipca.qmd",
-    "primary_html": null,
+    "primary_html": "docs/relatorio_ipca.html",
     "content_category": null,
     "has_parameters": false
   },
@@ -2016,6 +2016,9 @@
     },
     "relatorio_ipca.qmd": {
       "checksum": "a55e0364adc49a27910099eca4a1f0c1"
+    },
+    "docs/relatorio_ipca.html": {
+      "checksum": "e40bb07021901ec58abeaaa24c4cb2b4"
     }
   },
   "users": null
