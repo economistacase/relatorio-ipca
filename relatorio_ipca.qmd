@@ -2,6 +2,7 @@
 title: "Painel IPCA — Inflação Brasileira"
 subtitle: "Análise mensal com dados do BCB e IBGE"
 date: today
+author: "Raimundo Casé — economista"
 ---
 
 ```{r}
@@ -331,4 +332,16 @@ economizando chamadas desnecessárias às APIs.
   \text{peso}_i / 100$; soma dos grupos ≈ IPCA cheio (diferenças por
   arredondamento da API).
 - Relatório gerado em `r format(Sys.time(), "%d/%m/%Y às %H:%M")`.
+:::
+
+---
+
+::: {style="font-size: 0.85em; color: #555; margin-top: 2em;"}
+**Boletim Macroeconômico Semanal** — Semana de referência: `r format(Sys.Date(), "%Y/%m/%d")`
+
+Elaborado por Raimundo Casé — economista | economistacase@gmail.com
+
+Fontes primárias: BCB — Banco Central do Brasil (Selic, Câmbio, IBC-Br) | IBGE — Instituto Brasileiro de Geografia e Estatística (IPCA).
+
+*As análises e opiniões expressas neste boletim são de responsabilidade exclusiva do autor e não representam qualquer instituição.*
 :::
