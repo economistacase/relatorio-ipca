@@ -14,9 +14,8 @@ format:
     toc-title: "Sumário"
     toc-location: left
     number-sections: true
-    code-fold: true
-    code-summary: "Ver código"
-    code-tools: true
+    code-fold: false
+    code-tools: false
     fig-width: 9
     fig-height: 5
     fig-dpi: 150

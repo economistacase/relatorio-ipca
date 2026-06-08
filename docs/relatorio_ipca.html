@@ -2363,7 +2363,7 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<div class="quarto-title-block"><div><h1 class="title">Painel IPCA — Inflação Brasileira</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Código</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Mostrar o código</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Esconder o código</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">Ver o código fonte</a></li></ul></div></div>
+<h1 class="title">Painel IPCA — Inflação Brasileira</h1>
 <p class="subtitle lead">Análise mensal com dados do BCB e IBGE</p>
 </div>
 
@@ -2403,12 +2403,9 @@ window.Quarto = {
 <section id="sec-mensal" class="level2" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="sec-mensal"><span class="header-section-number">2</span> Panorama Mensal</h2>
 <div class="cell">
-<details class="code-fold">
-<summary>Ver código</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>g_mensal <span class="ot">&lt;-</span> <span class="fu">grafico_ipca_mensal</span>(ipca_raw)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">salvar_grafico</span>(g_mensal, <span class="st">&quot;ipca_mensal&quot;</span>)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>g_mensal</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
 <div class="cell-output-display">
 <div id="fig-mensal" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
@@ -2429,12 +2426,9 @@ Figura 1: IPCA — variação mensal (últimos 24 meses, referência abr/2026)
 <section id="sec-doze-meses" class="level2" data-number="3">
 <h2 data-number="3" class="anchored" data-anchor-id="sec-doze-meses"><span class="header-section-number">3</span> Acumulado em 12 Meses e Meta</h2>
 <div class="cell">
-<details class="code-fold">
-<summary>Ver código</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>g_12m <span class="ot">&lt;-</span> <span class="fu">grafico_ipca_12m</span>(ipca_12m, meta_raw)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">salvar_grafico</span>(g_12m, <span class="st">&quot;ipca_12m&quot;</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>g_12m</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
 <div class="cell-output-display">
 <div id="fig-12m" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
@@ -2456,12 +2450,9 @@ Figura 2: IPCA acumulado em 12 meses e meta do CMN com banda de tolerância (±
 <section id="sec-sazonal" class="level2" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="sec-sazonal"><span class="header-section-number">4</span> Sazonalidade</h2>
 <div class="cell">
-<details class="code-fold">
-<summary>Ver código</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>g_saz <span class="ot">&lt;-</span> <span class="fu">grafico_sazonal</span>(df_sazonal)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">salvar_grafico</span>(g_saz, <span class="st">&quot;ipca_sazonal&quot;</span>)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>g_saz</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
 <div class="cell-output-display">
 <div id="fig-sazonal" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
@@ -2483,12 +2474,9 @@ Figura 3: IPCA — sazonalidade mensal por ano (2015–2026)
 <section id="sec-contrib" class="level2" data-number="5">
 <h2 data-number="5" class="anchored" data-anchor-id="sec-contrib"><span class="header-section-number">5</span> Contribuições por Grupo</h2>
 <div class="cell">
-<details class="code-fold">
-<summary>Ver código</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>g_contrib <span class="ot">&lt;-</span> <span class="fu">grafico_contribuicoes</span>(contrib<span class="sc">$</span>mes_atual)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">salvar_grafico</span>(g_contrib, <span class="st">&quot;ipca_contribuicoes&quot;</span>)</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>g_contrib</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
 <div class="cell-output-display">
 <div id="fig-contrib" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
@@ -2589,7 +2577,6 @@ Tabela 1: Contribuições e pesos por grupo — abr/2026
 </div>
 <p>Em abr/2026, o grupo com <strong>maior contribuição positiva</strong> ao IPCA foi <strong>1.Alimentação e bebidas</strong> (+0.29 p.p.), enquanto <strong>8.Educação</strong> registrou a <strong>menor contribuição</strong> (+0.00 p.p.). A soma das contribuições dos nove grupos totaliza <strong>0.67 p.p.</strong>, o que deve aproximar-se da variação mensal do índice cheio (0.67%); qualquer discrepância acima de 0,05 p.p. sinaliza problema de consistência nos dados da API.</p>
 <p>A contribuição de um grupo não é sua variação bruta, mas o produto da variação pelo peso no índice, dividido por 100 — a fórmula <code>contribuição = variação × peso / 100</code>. Isso significa que um grupo com alta variação e baixo peso pode contribuir menos do que um grupo de variação moderada com peso elevado. É o caso típico de <strong>Alimentação e Bebidas</strong>, que com peso próximo a 23% pode dominar o resultado mensal mesmo com variação na faixa de 0,5%–1%.</p>
-<p>A tabela acima complementa o gráfico com os valores exatos de variação, peso e contribuição para os nove grupos, permitindo auditoria direta dos cálculos. O elemento <code>$sanity</code> do objeto <code>contrib</code> — acessível via <code>contrib$sanity</code> — contém, mês a mês, a soma das contribuições e dos pesos, sinalizando via coluna <code>ok_pesos</code> eventuais inconsistências entre as séries de variação e peso da API SIDRA.</p>
 <hr>
 </section>
 <section id="sec-encerramento" class="level2" data-number="6">
@@ -2626,7 +2613,6 @@ Tabela 1: Contribuições e pesos por grupo — abr/2026
 </tbody>
 </table>
 <p>O acumulado em 12 meses está <strong>dentro da banda de tolerância (1.50%–4.50%)</strong>. Do ponto de vista operacional, a trajetória do índice cheio reflete o balanço entre os grupos pressionados — especialmente Alimentação e Transportes, mais voláteis e sujeitos a choques de oferta — e os grupos mais inerciais, como Educação e Saúde, que tendem a reajustar contratos anualmente.</p>
-<p>Para análises complementares, os arquivos <code>output/ipca_mensal.png</code>, <code>output/ipca_12m.png</code>, <code>output/ipca_sazonal.png</code> e <code>output/ipca_contribuicoes.png</code> são gerados automaticamente a cada renderização, prontos para inserção em apresentações ou relatórios externos. O parâmetro <code>execute: freeze: auto</code> garante que os chunks sejam re-executados somente quando os arquivos fonte (<code>R/coleta.R</code>, <code>R/tratamento.R</code>, <code>R/graficos.R</code>) ou este documento forem modificados, economizando chamadas desnecessárias às APIs.</p>
 <hr>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
@@ -2647,20 +2633,18 @@ Tabela 1: Contribuições e pesos por grupo — abr/2026
 <li><strong>Fórmula de acumulado</strong>: <span class="math inline">\(\prod_{i}(1 + x_i/100) - 1\)</span>, sem aproximação linear.</li>
 <li><strong>Fórmula de contribuição</strong>: <span class="math inline">\(\text{contrib}_i = \text{variação}_i \times
 \text{peso}_i / 100\)</span>; soma dos grupos ≈ IPCA cheio (diferenças por arredondamento da API).</li>
-<li>Relatório gerado em 08/06/2026 às 19:41.</li>
+<li>Relatório gerado em 08/06/2026 às 20:04.</li>
 </ul>
 </div>
 </div>
 </div>
 <hr>
 <div style="font-size: 0.85em; color: #555; margin-top: 2em;">
-<p><strong>Boletim Macroeconômico Semanal</strong> — Semana de referência: 2026/06/08</p>
+<p><strong>Boletim IPCA</strong> — Semana de referência: 2026/06/08</p>
 <p>Elaborado por Raimundo Casé — economista | economistacase@gmail.com</p>
 <p>Fontes primárias: BCB — Banco Central do Brasil (Selic, Câmbio, IBC-Br) | IBGE — Instituto Brasileiro de Geografia e Estatística (IPCA).</p>
 <p><em>As análises e opiniões expressas neste boletim são de responsabilidade exclusiva do autor e não representam qualquer instituição.</em></p>
 </div>
-<!-- -->
-
 </section>
 
 </main>
@@ -2735,57 +2719,6 @@ Tabela 1: Contribuições e pesos por grupo — abr/2026
         container: window.document.getElementById('quarto-embedded-source-code-modal')
       });
       clipboardModal.on('success', onCopySuccess);
-    }
-    const viewSource = window.document.getElementById('quarto-view-source') ||
-                       window.document.getElementById('quarto-code-tools-source');
-    if (viewSource) {
-      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
-      viewSource.addEventListener("click", function(e) {
-        if (sourceUrl) {
-          // rstudio viewer pane
-          if (/\bcapabilities=\b/.test(window.location)) {
-            window.open(sourceUrl);
-          } else {
-            window.location.href = sourceUrl;
-          }
-        } else {
-          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
-          modal.show();
-        }
-        return false;
-      });
-    }
-    function toggleCodeHandler(show) {
-      return function(e) {
-        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
-        for (let i=0; i<detailsSrc.length; i++) {
-          const details = detailsSrc[i].parentElement;
-          if (show) {
-            details.open = true;
-          } else {
-            details.removeAttribute("open");
-          }
-        }
-        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
-        const fromCls = show ? "hidden" : "unhidden";
-        const toCls = show ? "unhidden" : "hidden";
-        for (let i=0; i<cellCodeDivs.length; i++) {
-          const codeDiv = cellCodeDivs[i];
-          if (codeDiv.classList.contains(fromCls)) {
-            codeDiv.classList.remove(fromCls);
-            codeDiv.classList.add(toCls);
-          } 
-        }
-        return false;
-      }
-    }
-    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
-    if (hideAllCode) {
-      hideAllCode.addEventListener("click", toggleCodeHandler(false));
-    }
-    const showAllCode = window.document.getElementById("quarto-show-all-code");
-    if (showAllCode) {
-      showAllCode.addEventListener("click", toggleCodeHandler(true));
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
@@ -3115,356 +3048,7 @@ Tabela 1: Contribuições e pesos por grupo — abr/2026
       }
     }
   });
-  </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Código fonte</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> &quot;Painel IPCA — Inflação Brasileira&quot;</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> &quot;Análise mensal com dados do BCB e IBGE&quot;</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> today</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> &quot;Raimundo Casé — economista&quot;</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: setup</span></span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="co">#| include: false</span></span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Fontes ──────────────────────────────────────────────────────────────────</span></span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">&quot;R/coleta.R&quot;</span>)</span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">&quot;R/tratamento.R&quot;</span>)</span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">&quot;R/graficos.R&quot;</span>)</span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Coleta de dados ──────────────────────────────────────────────────────────</span></span>
-<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>ipca_raw   <span class="ot">&lt;-</span> <span class="fu">coletar_ipca_mensal</span>()</span>
-<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>meta_raw   <span class="ot">&lt;-</span> <span class="fu">coletar_meta_inflacao</span>()</span>
-<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>grupos_raw <span class="ot">&lt;-</span> <span class="fu">coletar_ipca_grupos</span>()</span>
-<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Tratamento ───────────────────────────────────────────────────────────────</span></span>
-<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>ipca_12m    <span class="ot">&lt;-</span> <span class="fu">calcular_acumulado_12m</span>(ipca_raw)</span>
-<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>ipca_ano    <span class="ot">&lt;-</span> <span class="fu">calcular_acumulado_ano</span>(ipca_raw)</span>
-<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>df_sazonal  <span class="ot">&lt;-</span> <span class="fu">preparar_sazonal</span>(ipca_raw, <span class="at">ano_inicio =</span> <span class="dv">2015</span>)</span>
-<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>contrib     <span class="ot">&lt;-</span> <span class="fu">preparar_contribuicoes</span>(grupos_raw)</span>
-<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>df_meta_m   <span class="ot">&lt;-</span> <span class="fu">preparar_meta_mensal</span>(ipca_12m, meta_raw)</span>
-<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Escalares para inline code ───────────────────────────────────────────────</span></span>
-<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a><span class="co"># Mês de referência</span></span>
-<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>ref_data        <span class="ot">&lt;-</span> <span class="fu">max</span>(ipca_raw<span class="sc">$</span>data, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>ref_label       <span class="ot">&lt;-</span> <span class="fu">format</span>(ref_data, <span class="st">&quot;%B de %Y&quot;</span>)          <span class="co"># &quot;abril de 2025&quot;</span></span>
-<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>ref_label_curto <span class="ot">&lt;-</span> <span class="fu">format</span>(ref_data, <span class="st">&quot;%b/%Y&quot;</span>)             <span class="co"># &quot;abr/2025&quot;</span></span>
-<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a><span class="co"># Mês anterior</span></span>
-<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>ant_data        <span class="ot">&lt;-</span> ref_data <span class="sc">-</span> <span class="fu">months</span>(<span class="dv">1</span>)</span>
-<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>ant_label_curto <span class="ot">&lt;-</span> <span class="fu">format</span>(ant_data, <span class="st">&quot;%b/%Y&quot;</span>)</span>
-<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a><span class="co"># IPCA mensal</span></span>
-<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>ultimo_mm   <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">filter</span>(ipca_raw, data <span class="sc">==</span> ref_data) <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">pull</span>(ipca_mm)</span>
-<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a>penult_mm   <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">filter</span>(ipca_raw, data <span class="sc">==</span> ant_data) <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">pull</span>(ipca_mm)</span>
-<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>var_mm_diff <span class="ot">&lt;-</span> ultimo_mm <span class="sc">-</span> penult_mm          <span class="co"># aceleração (+) ou desaceleração (-)</span></span>
-<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a><span class="co"># Acumulado 12m e ano</span></span>
-<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>ultimo_12m  <span class="ot">&lt;-</span> ipca_12m <span class="sc">|&gt;</span></span>
-<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(acum_12m)) <span class="sc">|&gt;</span></span>
-<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_tail</span>(<span class="at">n =</span> <span class="dv">1</span>L) <span class="sc">|&gt;</span></span>
-<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">pull</span>(acum_12m)</span>
-<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>ultimo_ano  <span class="ot">&lt;-</span> ipca_ano <span class="sc">|&gt;</span></span>
-<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_tail</span>(<span class="at">n =</span> <span class="dv">1</span>L) <span class="sc">|&gt;</span></span>
-<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">pull</span>(acum_ano)</span>
-<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a><span class="co"># Meta e banda</span></span>
-<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a>meta_ano_atual <span class="ot">&lt;-</span> lubridate<span class="sc">::</span><span class="fu">year</span>(ref_data)</span>
-<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a>meta_valor     <span class="ot">&lt;-</span> meta_raw <span class="sc">|&gt;</span></span>
-<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">.ano =</span> lubridate<span class="sc">::</span><span class="fu">year</span>(data)) <span class="sc">|&gt;</span></span>
-<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(.ano <span class="sc">==</span> meta_ano_atual) <span class="sc">|&gt;</span></span>
-<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">pull</span>(meta_inflacao) <span class="sc">|&gt;</span></span>
-<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">first</span>()</span>
-<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a>meta_teto  <span class="ot">&lt;-</span> meta_valor <span class="sc">+</span> <span class="fl">1.5</span></span>
-<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a>meta_piso  <span class="ot">&lt;-</span> meta_valor <span class="sc">-</span> <span class="fl">1.5</span></span>
-<span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a>dentro_banda <span class="ot">&lt;-</span> <span class="sc">!</span><span class="fu">is.na</span>(meta_valor) <span class="sc">&amp;&amp;</span> ultimo_12m <span class="sc">&gt;=</span> meta_piso <span class="sc">&amp;&amp;</span> ultimo_12m <span class="sc">&lt;=</span> meta_teto</span>
-<span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-68"><a href="#cb5-68" aria-hidden="true" tabindex="-1"></a><span class="co"># Contribuições do mês</span></span>
-<span id="cb5-69"><a href="#cb5-69" aria-hidden="true" tabindex="-1"></a>maior_contrib  <span class="ot">&lt;-</span> contrib<span class="sc">$</span>mes_atual <span class="sc">|&gt;</span></span>
-<span id="cb5-70"><a href="#cb5-70" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_max</span>(contribuicao, <span class="at">n =</span> <span class="dv">1</span>L, <span class="at">with_ties =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb5-71"><a href="#cb5-71" aria-hidden="true" tabindex="-1"></a>menor_contrib  <span class="ot">&lt;-</span> contrib<span class="sc">$</span>mes_atual <span class="sc">|&gt;</span></span>
-<span id="cb5-72"><a href="#cb5-72" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_min</span>(contribuicao, <span class="at">n =</span> <span class="dv">1</span>L, <span class="at">with_ties =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb5-73"><a href="#cb5-73" aria-hidden="true" tabindex="-1"></a>soma_contrib   <span class="ot">&lt;-</span> <span class="fu">sum</span>(contrib<span class="sc">$</span>mes_atual<span class="sc">$</span>contribuicao, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb5-74"><a href="#cb5-74" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-75"><a href="#cb5-75" aria-hidden="true" tabindex="-1"></a><span class="co"># Funções auxiliares de formatação (inline sem poluição)</span></span>
-<span id="cb5-76"><a href="#cb5-76" aria-hidden="true" tabindex="-1"></a>fmt_pp  <span class="ot">&lt;-</span> <span class="cf">function</span>(x, <span class="at">digits =</span> <span class="dv">2</span>L) <span class="fu">format</span>(<span class="fu">round</span>(x, digits), <span class="at">nsmall =</span> digits)</span>
-<span id="cb5-77"><a href="#cb5-77" aria-hidden="true" tabindex="-1"></a>fmt_pct <span class="ot">&lt;-</span> <span class="cf">function</span>(x, <span class="at">digits =</span> <span class="dv">2</span>L) <span class="fu">paste0</span>(<span class="fu">fmt_pp</span>(x, digits), <span class="st">&quot;%&quot;</span>)</span>
-<span id="cb5-78"><a href="#cb5-78" aria-hidden="true" tabindex="-1"></a>fmt_sinal <span class="ot">&lt;-</span> <span class="cf">function</span>(x, <span class="at">digits =</span> <span class="dv">2</span>L) {</span>
-<span id="cb5-79"><a href="#cb5-79" aria-hidden="true" tabindex="-1"></a>  s <span class="ot">&lt;-</span> <span class="cf">if</span> (x <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="st">&quot;+&quot;</span> <span class="cf">else</span> <span class="st">&quot;&quot;</span></span>
-<span id="cb5-80"><a href="#cb5-80" aria-hidden="true" tabindex="-1"></a>  <span class="fu">paste0</span>(s, <span class="fu">fmt_pp</span>(x, digits), <span class="st">&quot; p.p.&quot;</span>)</span>
-<span id="cb5-81"><a href="#cb5-81" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb5-82"><a href="#cb5-82" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb5-83"><a href="#cb5-83" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-84"><a href="#cb5-84" aria-hidden="true" tabindex="-1"></a><span class="fu">## Introdução {#sec-intro}</span></span>
-<span id="cb5-85"><a href="#cb5-85" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-86"><a href="#cb5-86" aria-hidden="true" tabindex="-1"></a>O **Índice Nacional de Preços ao Consumidor Amplo (IPCA)** é o indicador</span>
-<span id="cb5-87"><a href="#cb5-87" aria-hidden="true" tabindex="-1"></a>oficial de inflação do Brasil, medido mensalmente pelo IBGE. Calculado com</span>
-<span id="cb5-88"><a href="#cb5-88" aria-hidden="true" tabindex="-1"></a>base em uma cesta de consumo de famílias com renda entre 1 e 40 salários</span>
-<span id="cb5-89"><a href="#cb5-89" aria-hidden="true" tabindex="-1"></a>mínimos nas principais regiões metropolitanas do país, o IPCA é a referência</span>
-<span id="cb5-90"><a href="#cb5-90" aria-hidden="true" tabindex="-1"></a>adotada pelo Banco Central na condução da política monetária pelo regime de</span>
-<span id="cb5-91"><a href="#cb5-91" aria-hidden="true" tabindex="-1"></a>metas de inflação, em vigor desde 1999.</span>
-<span id="cb5-92"><a href="#cb5-92" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-93"><a href="#cb5-93" aria-hidden="true" tabindex="-1"></a>A interpretação do IPCA exige múltiplas lentes temporais. A variação mensal</span>
-<span id="cb5-94"><a href="#cb5-94" aria-hidden="true" tabindex="-1"></a>revela o pulso imediato dos preços; o acumulado em doze meses é o horizonte</span>
-<span id="cb5-95"><a href="#cb5-95" aria-hidden="true" tabindex="-1"></a>pelo qual o Conselho Monetário Nacional (CMN) avalia o cumprimento da meta; o</span>
-<span id="cb5-96"><a href="#cb5-96" aria-hidden="true" tabindex="-1"></a>acumulado no ano captura a trajetória corrente; e a decomposição por grupos de</span>
-<span id="cb5-97"><a href="#cb5-97" aria-hidden="true" tabindex="-1"></a>despesa — Alimentação e Bebidas, Habitação, Transportes, entre outros —</span>
-<span id="cb5-98"><a href="#cb5-98" aria-hidden="true" tabindex="-1"></a>permite identificar de onde vem a pressão inflacionária. Este relatório</span>
-<span id="cb5-99"><a href="#cb5-99" aria-hidden="true" tabindex="-1"></a>organiza essas quatro perspectivas em painéis integrados, com dados direto do</span>
-<span id="cb5-100"><a href="#cb5-100" aria-hidden="true" tabindex="-1"></a>SGS/BCB (série 433 para o IPCA, série 13521 para a meta) e da API SIDRA/IBGE</span>
-<span id="cb5-101"><a href="#cb5-101" aria-hidden="true" tabindex="-1"></a>(tabela 7060 para os grupos).</span>
-<span id="cb5-102"><a href="#cb5-102" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-103"><a href="#cb5-103" aria-hidden="true" tabindex="-1"></a>Os dados mais recentes disponíveis são de **`r ref_label`**. Naquele mês, o</span>
-<span id="cb5-104"><a href="#cb5-104" aria-hidden="true" tabindex="-1"></a>IPCA registrou variação de **`r fmt_pct(ultimo_mm)`**, enquanto o acumulado</span>
-<span id="cb5-105"><a href="#cb5-105" aria-hidden="true" tabindex="-1"></a>em doze meses alcançou **`r fmt_pct(ultimo_12m)`** e o acumulado no ano</span>
-<span id="cb5-106"><a href="#cb5-106" aria-hidden="true" tabindex="-1"></a>chegou a **`r fmt_pct(ultimo_ano)`**. Ao longo das seções seguintes, esses</span>
-<span id="cb5-107"><a href="#cb5-107" aria-hidden="true" tabindex="-1"></a>números são contextualizados frente à meta vigente de</span>
-<span id="cb5-108"><a href="#cb5-108" aria-hidden="true" tabindex="-1"></a>**`r fmt_pct(meta_valor)`** (±1,5 p.p.) e ao comportamento histórico dos</span>
-<span id="cb5-109"><a href="#cb5-109" aria-hidden="true" tabindex="-1"></a>grupos de despesa.</span>
-<span id="cb5-110"><a href="#cb5-110" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-111"><a href="#cb5-111" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb5-112"><a href="#cb5-112" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-113"><a href="#cb5-113" aria-hidden="true" tabindex="-1"></a><span class="fu">## Panorama Mensal {#sec-mensal}</span></span>
-<span id="cb5-114"><a href="#cb5-114" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-117"><a href="#cb5-117" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb5-118"><a href="#cb5-118" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-mensal</span></span>
-<span id="cb5-119"><a href="#cb5-119" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: !expr sprintf(&quot;IPCA — variação mensal (últimos 24 meses, referência %s)&quot;, ref_label_curto)</span></span>
-<span id="cb5-120"><a href="#cb5-120" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-121"><a href="#cb5-121" aria-hidden="true" tabindex="-1"></a>g_mensal <span class="ot">&lt;-</span> <span class="fu">grafico_ipca_mensal</span>(ipca_raw)</span>
-<span id="cb5-122"><a href="#cb5-122" aria-hidden="true" tabindex="-1"></a><span class="fu">salvar_grafico</span>(g_mensal, <span class="st">&quot;ipca_mensal&quot;</span>)</span>
-<span id="cb5-123"><a href="#cb5-123" aria-hidden="true" tabindex="-1"></a>g_mensal</span>
-<span id="cb5-124"><a href="#cb5-124" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb5-125"><a href="#cb5-125" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-126"><a href="#cb5-126" aria-hidden="true" tabindex="-1"></a>Em **`r ref_label_curto`**, o IPCA variou **`r fmt_pct(ultimo_mm)`**,</span>
-<span id="cb5-127"><a href="#cb5-127" aria-hidden="true" tabindex="-1"></a>resultado <span class="in">`r if (var_mm_diff &gt; 0) &quot;superior&quot; else if (var_mm_diff &lt; 0) &quot;inferior&quot; else &quot;igual&quot;`</span></span>
-<span id="cb5-128"><a href="#cb5-128" aria-hidden="true" tabindex="-1"></a>ao registrado em <span class="in">`r ant_label_curto`</span></span>
-<span id="cb5-129"><a href="#cb5-129" aria-hidden="true" tabindex="-1"></a>(<span class="in">`r fmt_pct(penult_mm)`</span>), uma diferença de **`r fmt_sinal(var_mm_diff)`**.</span>
-<span id="cb5-130"><a href="#cb5-130" aria-hidden="true" tabindex="-1"></a>O gráfico acima exibe as barras mensais dos últimos 24 meses em escala</span>
-<span id="cb5-131"><a href="#cb5-131" aria-hidden="true" tabindex="-1"></a>truncada para facilitar a leitura das variações, que em geral oscilam em</span>
-<span id="cb5-132"><a href="#cb5-132" aria-hidden="true" tabindex="-1"></a>frações de ponto percentual. Barras em azul-marinho indicam meses de inflação</span>
-<span id="cb5-133"><a href="#cb5-133" aria-hidden="true" tabindex="-1"></a>positiva; barras em âmbar, deflação.</span>
-<span id="cb5-134"><a href="#cb5-134" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-135"><a href="#cb5-135" aria-hidden="true" tabindex="-1"></a>A leitura isolada do mês corrente, embora relevante para acompanhar o ritmo</span>
-<span id="cb5-136"><a href="#cb5-136" aria-hidden="true" tabindex="-1"></a>de curto prazo, pode ser enganosa quando o IPCA apresenta forte componente</span>
-<span id="cb5-137"><a href="#cb5-137" aria-hidden="true" tabindex="-1"></a>sazonal — como ocorre tipicamente em março (reajuste de mensalidades</span>
-<span id="cb5-138"><a href="#cb5-138" aria-hidden="true" tabindex="-1"></a>escolares) e nos meses de energia elétrica. Por isso, a seção seguinte amplia</span>
-<span id="cb5-139"><a href="#cb5-139" aria-hidden="true" tabindex="-1"></a>o horizonte para o acumulado em 12 meses, que suaviza esses efeitos e oferece</span>
-<span id="cb5-140"><a href="#cb5-140" aria-hidden="true" tabindex="-1"></a>a visão sobre a qual o Banco Central calibra a taxa Selic.</span>
-<span id="cb5-141"><a href="#cb5-141" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-142"><a href="#cb5-142" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb5-143"><a href="#cb5-143" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-144"><a href="#cb5-144" aria-hidden="true" tabindex="-1"></a><span class="fu">## Acumulado em 12 Meses e Meta {#sec-doze-meses}</span></span>
-<span id="cb5-145"><a href="#cb5-145" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-148"><a href="#cb5-148" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb5-149"><a href="#cb5-149" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-12m</span></span>
-<span id="cb5-150"><a href="#cb5-150" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: &quot;IPCA acumulado em 12 meses e meta do CMN com banda de tolerância (±1,5 p.p.)&quot;</span></span>
-<span id="cb5-151"><a href="#cb5-151" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-152"><a href="#cb5-152" aria-hidden="true" tabindex="-1"></a>g_12m <span class="ot">&lt;-</span> <span class="fu">grafico_ipca_12m</span>(ipca_12m, meta_raw)</span>
-<span id="cb5-153"><a href="#cb5-153" aria-hidden="true" tabindex="-1"></a><span class="fu">salvar_grafico</span>(g_12m, <span class="st">&quot;ipca_12m&quot;</span>)</span>
-<span id="cb5-154"><a href="#cb5-154" aria-hidden="true" tabindex="-1"></a>g_12m</span>
-<span id="cb5-155"><a href="#cb5-155" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb5-156"><a href="#cb5-156" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-157"><a href="#cb5-157" aria-hidden="true" tabindex="-1"></a>O acumulado em doze meses atingiu **`r fmt_pct(ultimo_12m)`** em</span>
-<span id="cb5-158"><a href="#cb5-158" aria-hidden="true" tabindex="-1"></a><span class="in">`r ref_label_curto`</span>. A meta fixada pelo CMN para <span class="in">`r meta_ano_atual`</span> é de</span>
-<span id="cb5-159"><a href="#cb5-159" aria-hidden="true" tabindex="-1"></a>**`r fmt_pct(meta_valor)`**, com intervalo de tolerância entre</span>
-<span id="cb5-160"><a href="#cb5-160" aria-hidden="true" tabindex="-1"></a>**`r fmt_pct(meta_piso)`** e **`r fmt_pct(meta_teto)`**. O IPCA 12m está,</span>
-<span id="cb5-161"><a href="#cb5-161" aria-hidden="true" tabindex="-1"></a>portanto, **`r if (dentro_banda) &quot;dentro&quot; else &quot;fora&quot;`** da banda de</span>
-<span id="cb5-162"><a href="#cb5-162" aria-hidden="true" tabindex="-1"></a>tolerância. A faixa verde translúcida no gráfico marca essa banda; a linha</span>
-<span id="cb5-163"><a href="#cb5-163" aria-hidden="true" tabindex="-1"></a>tracejada, a meta central, que pode mudar de patamar ano a ano conforme as</span>
-<span id="cb5-164"><a href="#cb5-164" aria-hidden="true" tabindex="-1"></a>deliberações do CMN.</span>
-<span id="cb5-165"><a href="#cb5-165" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-166"><a href="#cb5-166" aria-hidden="true" tabindex="-1"></a>A série histórica evidencia os episódios em que o IPCA ultrapassou o teto —</span>
-<span id="cb5-167"><a href="#cb5-167" aria-hidden="true" tabindex="-1"></a>em particular o biênio 2021–2022, marcado pelos choques de energia, câmbio e</span>
-<span id="cb5-168"><a href="#cb5-168" aria-hidden="true" tabindex="-1"></a>commodities no pós-pandemia — e a subsequente desinflação que trouxe o índice</span>
-<span id="cb5-169"><a href="#cb5-169" aria-hidden="true" tabindex="-1"></a>de volta à vizinhança da meta. O gráfico apresenta a meta em degraus anuais</span>
-<span id="cb5-170"><a href="#cb5-170" aria-hidden="true" tabindex="-1"></a>(<span class="in">`geom_step`</span>), sem interpolar entre valores de anos consecutivos, o que</span>
-<span id="cb5-171"><a href="#cb5-171" aria-hidden="true" tabindex="-1"></a>preserva a fidelidade à deliberação oficial: a meta é válida para o ano</span>
-<span id="cb5-172"><a href="#cb5-172" aria-hidden="true" tabindex="-1"></a>inteiro, não varia mês a mês.</span>
-<span id="cb5-173"><a href="#cb5-173" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-174"><a href="#cb5-174" aria-hidden="true" tabindex="-1"></a>A caixa no canto superior direito exibe o último valor disponível do IPCA</span>
-<span id="cb5-175"><a href="#cb5-175" aria-hidden="true" tabindex="-1"></a>12m, facilitando a leitura imediata sem necessidade de inspecionar o eixo</span>
-<span id="cb5-176"><a href="#cb5-176" aria-hidden="true" tabindex="-1"></a>vertical. Esse recurso é especialmente útil quando o relatório é consultado</span>
-<span id="cb5-177"><a href="#cb5-177" aria-hidden="true" tabindex="-1"></a>rapidamente, como em reuniões do Copom ou apresentações de estratégia.</span>
-<span id="cb5-178"><a href="#cb5-178" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-179"><a href="#cb5-179" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb5-180"><a href="#cb5-180" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-181"><a href="#cb5-181" aria-hidden="true" tabindex="-1"></a><span class="fu">## Sazonalidade {#sec-sazonal}</span></span>
-<span id="cb5-182"><a href="#cb5-182" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-185"><a href="#cb5-185" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb5-186"><a href="#cb5-186" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-sazonal</span></span>
-<span id="cb5-187"><a href="#cb5-187" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: !expr sprintf(&quot;IPCA — sazonalidade mensal por ano (2015–%d)&quot;, lubridate::year(ref_data))</span></span>
-<span id="cb5-188"><a href="#cb5-188" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-189"><a href="#cb5-189" aria-hidden="true" tabindex="-1"></a>g_saz <span class="ot">&lt;-</span> <span class="fu">grafico_sazonal</span>(df_sazonal)</span>
-<span id="cb5-190"><a href="#cb5-190" aria-hidden="true" tabindex="-1"></a><span class="fu">salvar_grafico</span>(g_saz, <span class="st">&quot;ipca_sazonal&quot;</span>)</span>
-<span id="cb5-191"><a href="#cb5-191" aria-hidden="true" tabindex="-1"></a>g_saz</span>
-<span id="cb5-192"><a href="#cb5-192" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb5-193"><a href="#cb5-193" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-194"><a href="#cb5-194" aria-hidden="true" tabindex="-1"></a>O gráfico sazonal sobrepõe a trajetória mensal de cada ano — cada linha</span>
-<span id="cb5-195"><a href="#cb5-195" aria-hidden="true" tabindex="-1"></a>corresponde a um ano, o ano <span class="in">`r lubridate::year(ref_data)`</span> destacado em azul</span>
-<span id="cb5-196"><a href="#cb5-196" aria-hidden="true" tabindex="-1"></a>com traço mais espesso e os demais em gradiente de cinza. Esse formato permite</span>
-<span id="cb5-197"><a href="#cb5-197" aria-hidden="true" tabindex="-1"></a>identificar rapidamente se o padrão do ano corrente se assemelha ao de anos</span>
-<span id="cb5-198"><a href="#cb5-198" aria-hidden="true" tabindex="-1"></a>anteriores ou se apresenta desvio significativo, e em qual mês a divergência</span>
-<span id="cb5-199"><a href="#cb5-199" aria-hidden="true" tabindex="-1"></a>se manifesta.</span>
-<span id="cb5-200"><a href="#cb5-200" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-201"><a href="#cb5-201" aria-hidden="true" tabindex="-1"></a>Historicamente, o primeiro trimestre concentra as leituras mais elevadas, por</span>
-<span id="cb5-202"><a href="#cb5-202" aria-hidden="true" tabindex="-1"></a>conta do reajuste de mensalidades escolares (março), de tarifas de planos de</span>
-<span id="cb5-203"><a href="#cb5-203" aria-hidden="true" tabindex="-1"></a>saúde e de itens de alimentação com sazonalidade agrícola. O segundo semestre</span>
-<span id="cb5-204"><a href="#cb5-204" aria-hidden="true" tabindex="-1"></a>costuma apresentar alívio relativo, especialmente entre julho e setembro, antes</span>
-<span id="cb5-205"><a href="#cb5-205" aria-hidden="true" tabindex="-1"></a>de nova pressão típica de dezembro em itens como vestuário e lazer. Entender</span>
-<span id="cb5-206"><a href="#cb5-206" aria-hidden="true" tabindex="-1"></a>esse padrão ajuda a separar o componente sazonal do componente tendencial, um</span>
-<span id="cb5-207"><a href="#cb5-207" aria-hidden="true" tabindex="-1"></a>insumo fundamental para modelos de inflação no atacado e para projeções de</span>
-<span id="cb5-208"><a href="#cb5-208" aria-hidden="true" tabindex="-1"></a>curto prazo.</span>
-<span id="cb5-209"><a href="#cb5-209" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-210"><a href="#cb5-210" aria-hidden="true" tabindex="-1"></a>A comparação visual entre anos revela também ciclos de política monetária: em</span>
-<span id="cb5-211"><a href="#cb5-211" aria-hidden="true" tabindex="-1"></a>anos de aperto (Selic em alta), a linha do IPCA mensal tende a ficar abaixo</span>
-<span id="cb5-212"><a href="#cb5-212" aria-hidden="true" tabindex="-1"></a>da média histórica especialmente nos meses de maior inércia; em anos de</span>
-<span id="cb5-213"><a href="#cb5-213" aria-hidden="true" tabindex="-1"></a>afrouxamento ou de choques externos, a sazonalidade habitual pode ser</span>
-<span id="cb5-214"><a href="#cb5-214" aria-hidden="true" tabindex="-1"></a>amplificada ou invertida. O gráfico interativo (ao expandir o código acima) dá</span>
-<span id="cb5-215"><a href="#cb5-215" aria-hidden="true" tabindex="-1"></a>acesso a todos os valores subjacentes para análise mais granular.</span>
-<span id="cb5-216"><a href="#cb5-216" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-217"><a href="#cb5-217" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb5-218"><a href="#cb5-218" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-219"><a href="#cb5-219" aria-hidden="true" tabindex="-1"></a><span class="fu">## Contribuições por Grupo {#sec-contrib}</span></span>
-<span id="cb5-220"><a href="#cb5-220" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-223"><a href="#cb5-223" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb5-224"><a href="#cb5-224" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-contrib</span></span>
-<span id="cb5-225"><a href="#cb5-225" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: !expr sprintf(&quot;Contribuição ao IPCA por grupo de despesa — %s&quot;, ref_label_curto)</span></span>
-<span id="cb5-226"><a href="#cb5-226" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 5.5</span></span>
-<span id="cb5-227"><a href="#cb5-227" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-228"><a href="#cb5-228" aria-hidden="true" tabindex="-1"></a>g_contrib <span class="ot">&lt;-</span> <span class="fu">grafico_contribuicoes</span>(contrib<span class="sc">$</span>mes_atual)</span>
-<span id="cb5-229"><a href="#cb5-229" aria-hidden="true" tabindex="-1"></a><span class="fu">salvar_grafico</span>(g_contrib, <span class="st">&quot;ipca_contribuicoes&quot;</span>)</span>
-<span id="cb5-230"><a href="#cb5-230" aria-hidden="true" tabindex="-1"></a>g_contrib</span>
-<span id="cb5-231"><a href="#cb5-231" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb5-232"><a href="#cb5-232" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-235"><a href="#cb5-235" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb5-236"><a href="#cb5-236" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: tbl-contrib</span></span>
-<span id="cb5-237"><a href="#cb5-237" aria-hidden="true" tabindex="-1"></a><span class="co">#| tbl-cap: !expr sprintf(&quot;Contribuições e pesos por grupo — %s&quot;, ref_label_curto)</span></span>
-<span id="cb5-238"><a href="#cb5-238" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
-<span id="cb5-239"><a href="#cb5-239" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-240"><a href="#cb5-240" aria-hidden="true" tabindex="-1"></a>contrib<span class="sc">$</span>mes_atual <span class="sc">|&gt;</span></span>
-<span id="cb5-241"><a href="#cb5-241" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(grupo, variacao, peso, contribuicao) <span class="sc">|&gt;</span></span>
-<span id="cb5-242"><a href="#cb5-242" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(contribuicao)) <span class="sc">|&gt;</span></span>
-<span id="cb5-243"><a href="#cb5-243" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb5-244"><a href="#cb5-244" aria-hidden="true" tabindex="-1"></a>    <span class="at">variacao     =</span> <span class="fu">round</span>(variacao,     <span class="dv">2</span>L),</span>
-<span id="cb5-245"><a href="#cb5-245" aria-hidden="true" tabindex="-1"></a>    <span class="at">peso         =</span> <span class="fu">round</span>(peso,         <span class="dv">2</span>L),</span>
-<span id="cb5-246"><a href="#cb5-246" aria-hidden="true" tabindex="-1"></a>    <span class="at">contribuicao =</span> <span class="fu">round</span>(contribuicao, <span class="dv">4</span>L)</span>
-<span id="cb5-247"><a href="#cb5-247" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb5-248"><a href="#cb5-248" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(</span>
-<span id="cb5-249"><a href="#cb5-249" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">Grupo</span><span class="st">`</span>             <span class="ot">=</span> grupo,</span>
-<span id="cb5-250"><a href="#cb5-250" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">Variação (% a.m.)</span><span class="st">`</span> <span class="ot">=</span> variacao,</span>
-<span id="cb5-251"><a href="#cb5-251" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">Peso (p.p.)</span><span class="st">`</span>       <span class="ot">=</span> peso,</span>
-<span id="cb5-252"><a href="#cb5-252" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">Contribuição (p.p.)</span><span class="st">`</span> <span class="ot">=</span> contribuicao</span>
-<span id="cb5-253"><a href="#cb5-253" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb5-254"><a href="#cb5-254" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="at">align =</span> <span class="fu">c</span>(<span class="st">&quot;l&quot;</span>, <span class="st">&quot;r&quot;</span>, <span class="st">&quot;r&quot;</span>, <span class="st">&quot;r&quot;</span>))</span>
-<span id="cb5-255"><a href="#cb5-255" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb5-256"><a href="#cb5-256" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-257"><a href="#cb5-257" aria-hidden="true" tabindex="-1"></a>Em <span class="in">`r ref_label_curto`</span>, o grupo com **maior contribuição positiva** ao IPCA</span>
-<span id="cb5-258"><a href="#cb5-258" aria-hidden="true" tabindex="-1"></a>foi **`r maior_contrib$grupo`**</span>
-<span id="cb5-259"><a href="#cb5-259" aria-hidden="true" tabindex="-1"></a>(<span class="in">`r fmt_sinal(maior_contrib$contribuicao[1])`</span>), enquanto</span>
-<span id="cb5-260"><a href="#cb5-260" aria-hidden="true" tabindex="-1"></a>**`r menor_contrib$grupo`** registrou a</span>
-<span id="cb5-261"><a href="#cb5-261" aria-hidden="true" tabindex="-1"></a>**menor contribuição** (<span class="in">`r fmt_sinal(menor_contrib$contribuicao[1])`</span>).</span>
-<span id="cb5-262"><a href="#cb5-262" aria-hidden="true" tabindex="-1"></a>A soma das contribuições dos nove grupos totaliza</span>
-<span id="cb5-263"><a href="#cb5-263" aria-hidden="true" tabindex="-1"></a>**`r fmt_pp(soma_contrib)` p.p.**, o que deve aproximar-se da variação mensal</span>
-<span id="cb5-264"><a href="#cb5-264" aria-hidden="true" tabindex="-1"></a>do índice cheio (<span class="in">`r fmt_pct(ultimo_mm)`</span>); qualquer discrepância acima de 0,05</span>
-<span id="cb5-265"><a href="#cb5-265" aria-hidden="true" tabindex="-1"></a>p.p. sinaliza problema de consistência nos dados da API.</span>
-<span id="cb5-266"><a href="#cb5-266" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-267"><a href="#cb5-267" aria-hidden="true" tabindex="-1"></a>A contribuição de um grupo não é sua variação bruta, mas o produto da variação</span>
-<span id="cb5-268"><a href="#cb5-268" aria-hidden="true" tabindex="-1"></a>pelo peso no índice, dividido por 100 — a fórmula `contribuição = variação ×</span>
-<span id="cb5-269"><a href="#cb5-269" aria-hidden="true" tabindex="-1"></a>peso / 100`. Isso significa que um grupo com alta variação e baixo peso pode</span>
-<span id="cb5-270"><a href="#cb5-270" aria-hidden="true" tabindex="-1"></a>contribuir menos do que um grupo de variação moderada com peso elevado. É o</span>
-<span id="cb5-271"><a href="#cb5-271" aria-hidden="true" tabindex="-1"></a>caso típico de **Alimentação e Bebidas**, que com peso próximo a 23% pode</span>
-<span id="cb5-272"><a href="#cb5-272" aria-hidden="true" tabindex="-1"></a>dominar o resultado mensal mesmo com variação na faixa de 0,5%–1%.</span>
-<span id="cb5-273"><a href="#cb5-273" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-274"><a href="#cb5-274" aria-hidden="true" tabindex="-1"></a>A tabela acima complementa o gráfico com os valores exatos de variação, peso</span>
-<span id="cb5-275"><a href="#cb5-275" aria-hidden="true" tabindex="-1"></a>e contribuição para os nove grupos, permitindo auditoria direta dos cálculos.</span>
-<span id="cb5-276"><a href="#cb5-276" aria-hidden="true" tabindex="-1"></a>O elemento <span class="in">`$sanity`</span> do objeto <span class="in">`contrib`</span> — acessível via <span class="in">`contrib$sanity`</span> —</span>
-<span id="cb5-277"><a href="#cb5-277" aria-hidden="true" tabindex="-1"></a>contém, mês a mês, a soma das contribuições e dos pesos, sinalizando via</span>
-<span id="cb5-278"><a href="#cb5-278" aria-hidden="true" tabindex="-1"></a>coluna <span class="in">`ok_pesos`</span> eventuais inconsistências entre as séries de variação e peso</span>
-<span id="cb5-279"><a href="#cb5-279" aria-hidden="true" tabindex="-1"></a>da API SIDRA.</span>
-<span id="cb5-280"><a href="#cb5-280" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-281"><a href="#cb5-281" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb5-282"><a href="#cb5-282" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-283"><a href="#cb5-283" aria-hidden="true" tabindex="-1"></a><span class="fu">## Encerramento {#sec-encerramento}</span></span>
-<span id="cb5-284"><a href="#cb5-284" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-287"><a href="#cb5-287" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb5-288"><a href="#cb5-288" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: resumo-scalars</span></span>
-<span id="cb5-289"><a href="#cb5-289" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
-<span id="cb5-290"><a href="#cb5-290" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-291"><a href="#cb5-291" aria-hidden="true" tabindex="-1"></a><span class="co"># Verificação de consistência do mês atual</span></span>
-<span id="cb5-292"><a href="#cb5-292" aria-hidden="true" tabindex="-1"></a>check_mes <span class="ot">&lt;-</span> contrib<span class="sc">$</span>sanity <span class="sc">|&gt;</span></span>
-<span id="cb5-293"><a href="#cb5-293" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(data <span class="sc">==</span> ref_data)</span>
-<span id="cb5-294"><a href="#cb5-294" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-295"><a href="#cb5-295" aria-hidden="true" tabindex="-1"></a>status_banda <span class="ot">&lt;-</span> <span class="cf">if</span> (dentro_banda) {</span>
-<span id="cb5-296"><a href="#cb5-296" aria-hidden="true" tabindex="-1"></a>  <span class="fu">paste0</span>(<span class="st">&quot;dentro da banda de tolerância (&quot;</span>, <span class="fu">fmt_pct</span>(meta_piso), <span class="st">&quot;–&quot;</span>,</span>
-<span id="cb5-297"><a href="#cb5-297" aria-hidden="true" tabindex="-1"></a>         <span class="fu">fmt_pct</span>(meta_teto), <span class="st">&quot;)&quot;</span>)</span>
-<span id="cb5-298"><a href="#cb5-298" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> <span class="cf">if</span> (ultimo_12m <span class="sc">&gt;</span> meta_teto) {</span>
-<span id="cb5-299"><a href="#cb5-299" aria-hidden="true" tabindex="-1"></a>  <span class="fu">paste0</span>(<span class="st">&quot;acima do teto da banda (&quot;</span>, <span class="fu">fmt_pct</span>(meta_teto), <span class="st">&quot;)&quot;</span>)</span>
-<span id="cb5-300"><a href="#cb5-300" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
-<span id="cb5-301"><a href="#cb5-301" aria-hidden="true" tabindex="-1"></a>  <span class="fu">paste0</span>(<span class="st">&quot;abaixo do piso da banda (&quot;</span>, <span class="fu">fmt_pct</span>(meta_piso), <span class="st">&quot;)&quot;</span>)</span>
-<span id="cb5-302"><a href="#cb5-302" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb5-303"><a href="#cb5-303" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb5-304"><a href="#cb5-304" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-305"><a href="#cb5-305" aria-hidden="true" tabindex="-1"></a>Este relatório consolidou quatro dimensões do IPCA de **`r ref_label`**:</span>
-<span id="cb5-306"><a href="#cb5-306" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-307"><a href="#cb5-307" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Indicador <span class="pp">|</span> Valor <span class="pp">|</span></span>
-<span id="cb5-308"><a href="#cb5-308" aria-hidden="true" tabindex="-1"></a><span class="pp">|---|---|</span></span>
-<span id="cb5-309"><a href="#cb5-309" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Variação mensal <span class="pp">|</span> <span class="in">`r fmt_pct(ultimo_mm)`</span> <span class="pp">|</span></span>
-<span id="cb5-310"><a href="#cb5-310" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Acumulado no ano <span class="pp">|</span> <span class="in">`r fmt_pct(ultimo_ano)`</span> <span class="pp">|</span></span>
-<span id="cb5-311"><a href="#cb5-311" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Acumulado 12 meses <span class="pp">|</span> <span class="in">`r fmt_pct(ultimo_12m)`</span> <span class="pp">|</span></span>
-<span id="cb5-312"><a href="#cb5-312" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Meta CMN <span class="in">`r meta_ano_atual`</span> <span class="pp">|</span> <span class="in">`r fmt_pct(meta_valor)`</span> ± 1,5 p.p. <span class="pp">|</span></span>
-<span id="cb5-313"><a href="#cb5-313" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Maior contribuição do mês <span class="pp">|</span> <span class="in">`r maior_contrib$grupo`</span> (<span class="in">`r fmt_sinal(maior_contrib$contribuicao[1])`</span>) <span class="pp">|</span></span>
-<span id="cb5-314"><a href="#cb5-314" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-315"><a href="#cb5-315" aria-hidden="true" tabindex="-1"></a>O acumulado em 12 meses está **`r status_banda`**. Do ponto de vista</span>
-<span id="cb5-316"><a href="#cb5-316" aria-hidden="true" tabindex="-1"></a>operacional, a trajetória do índice cheio reflete o balanço entre os</span>
-<span id="cb5-317"><a href="#cb5-317" aria-hidden="true" tabindex="-1"></a>grupos pressionados — especialmente Alimentação e Transportes, mais voláteis e</span>
-<span id="cb5-318"><a href="#cb5-318" aria-hidden="true" tabindex="-1"></a>sujeitos a choques de oferta — e os grupos mais inerciais, como Educação e</span>
-<span id="cb5-319"><a href="#cb5-319" aria-hidden="true" tabindex="-1"></a>Saúde, que tendem a reajustar contratos anualmente.</span>
-<span id="cb5-320"><a href="#cb5-320" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-321"><a href="#cb5-321" aria-hidden="true" tabindex="-1"></a>Para análises complementares, os arquivos <span class="in">`output/ipca_mensal.png`</span>,</span>
-<span id="cb5-322"><a href="#cb5-322" aria-hidden="true" tabindex="-1"></a><span class="in">`output/ipca_12m.png`</span>, <span class="in">`output/ipca_sazonal.png`</span> e</span>
-<span id="cb5-323"><a href="#cb5-323" aria-hidden="true" tabindex="-1"></a><span class="in">`output/ipca_contribuicoes.png`</span> são gerados automaticamente a cada</span>
-<span id="cb5-324"><a href="#cb5-324" aria-hidden="true" tabindex="-1"></a>renderização, prontos para inserção em apresentações ou relatórios externos.</span>
-<span id="cb5-325"><a href="#cb5-325" aria-hidden="true" tabindex="-1"></a>O parâmetro <span class="in">`execute: freeze: auto`</span> garante que os chunks sejam</span>
-<span id="cb5-326"><a href="#cb5-326" aria-hidden="true" tabindex="-1"></a>re-executados somente quando os arquivos fonte (<span class="in">`R/coleta.R`</span>,</span>
-<span id="cb5-327"><a href="#cb5-327" aria-hidden="true" tabindex="-1"></a><span class="in">`R/tratamento.R`</span>, <span class="in">`R/graficos.R`</span>) ou este documento forem modificados,</span>
-<span id="cb5-328"><a href="#cb5-328" aria-hidden="true" tabindex="-1"></a>economizando chamadas desnecessárias às APIs.</span>
-<span id="cb5-329"><a href="#cb5-329" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-330"><a href="#cb5-330" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb5-331"><a href="#cb5-331" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-332"><a href="#cb5-332" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse=&quot;true&quot;}</span>
-<span id="cb5-333"><a href="#cb5-333" aria-hidden="true" tabindex="-1"></a><span class="fu">## Notas metodológicas e fontes</span></span>
-<span id="cb5-334"><a href="#cb5-334" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-335"><a href="#cb5-335" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Série 433 / SGS-BCB**: IPCA — variação percentual mensal, divulgado</span>
-<span id="cb5-336"><a href="#cb5-336" aria-hidden="true" tabindex="-1"></a>  pelo IBGE e disponibilizado no Sistema Gerenciador de Séries Temporais</span>
-<span id="cb5-337"><a href="#cb5-337" aria-hidden="true" tabindex="-1"></a>  do Banco Central do Brasil. Acesso via pacote <span class="in">`rbcb`</span>.</span>
-<span id="cb5-338"><a href="#cb5-338" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Série 13521 / SGS-BCB**: Meta de inflação fixada pelo CMN, em pontos</span>
-<span id="cb5-339"><a href="#cb5-339" aria-hidden="true" tabindex="-1"></a>  percentuais ao ano.</span>
-<span id="cb5-340"><a href="#cb5-340" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Tabela 7060 / SIDRA-IBGE**: IPCA — variação mensal (variável 63) e</span>
-<span id="cb5-341"><a href="#cb5-341" aria-hidden="true" tabindex="-1"></a>  peso mensal (variável 66) para os 9 grupos de despesa (classificação c315).</span>
-<span id="cb5-342"><a href="#cb5-342" aria-hidden="true" tabindex="-1"></a>  Acesso via pacote <span class="in">`sidrar`</span>.</span>
-<span id="cb5-343"><a href="#cb5-343" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Fórmula de acumulado**: $\prod_{i}(1 + x_i/100) - 1$, sem aproximação</span>
-<span id="cb5-344"><a href="#cb5-344" aria-hidden="true" tabindex="-1"></a>  linear.</span>
-<span id="cb5-345"><a href="#cb5-345" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Fórmula de contribuição**: $\text{contrib}_i = \text{variação}_i \times</span>
-<span id="cb5-346"><a href="#cb5-346" aria-hidden="true" tabindex="-1"></a>  \text{peso}_i / 100$; soma dos grupos ≈ IPCA cheio (diferenças por</span>
-<span id="cb5-347"><a href="#cb5-347" aria-hidden="true" tabindex="-1"></a>  arredondamento da API).</span>
-<span id="cb5-348"><a href="#cb5-348" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Relatório gerado em <span class="in">`r format(Sys.time(), &quot;%d/%m/%Y às %H:%M&quot;)`</span>.</span>
-<span id="cb5-349"><a href="#cb5-349" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb5-350"><a href="#cb5-350" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-351"><a href="#cb5-351" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb5-352"><a href="#cb5-352" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-353"><a href="#cb5-353" aria-hidden="true" tabindex="-1"></a>::: {style=&quot;font-size: 0.85em; color: #555; margin-top: 2em;&quot;}</span>
-<span id="cb5-354"><a href="#cb5-354" aria-hidden="true" tabindex="-1"></a>**Boletim Macroeconômico Semanal** — Semana de referência: <span class="in">`r format(Sys.Date(), &quot;%Y/%m/%d&quot;)`</span></span>
-<span id="cb5-355"><a href="#cb5-355" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-356"><a href="#cb5-356" aria-hidden="true" tabindex="-1"></a>Elaborado por Raimundo Casé — economista | economistacase@gmail.com</span>
-<span id="cb5-357"><a href="#cb5-357" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-358"><a href="#cb5-358" aria-hidden="true" tabindex="-1"></a>Fontes primárias: BCB — Banco Central do Brasil (Selic, Câmbio, IBC-Br) | IBGE — Instituto Brasileiro de Geografia e Estatística (IPCA).</span>
-<span id="cb5-359"><a href="#cb5-359" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-360"><a href="#cb5-360" aria-hidden="true" tabindex="-1"></a>*As análises e opiniões expressas neste boletim são de responsabilidade exclusiva do autor e não representam qualquer instituição.*</span>
-<span id="cb5-361"><a href="#cb5-361" aria-hidden="true" tabindex="-1"></a>:::</span>
-</code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button" data-in-quarto-modal><i class="bi"></i></button></div>
-</div></div></div></div></div>
+  </script>
 </div> <!-- /content -->
 
 

@@ -259,12 +259,6 @@ contribuir menos do que um grupo de variação moderada com peso elevado. É o
 caso típico de **Alimentação e Bebidas**, que com peso próximo a 23% pode
 dominar o resultado mensal mesmo com variação na faixa de 0,5%–1%.
 
-A tabela acima complementa o gráfico com os valores exatos de variação, peso
-e contribuição para os nove grupos, permitindo auditoria direta dos cálculos.
-O elemento `$sanity` do objeto `contrib` — acessível via `contrib$sanity` —
-contém, mês a mês, a soma das contribuições e dos pesos, sinalizando via
-coluna `ok_pesos` eventuais inconsistências entre as séries de variação e peso
-da API SIDRA.
 
 ---
 
@@ -304,14 +298,6 @@ grupos pressionados — especialmente Alimentação e Transportes, mais volátei
 sujeitos a choques de oferta — e os grupos mais inerciais, como Educação e
 Saúde, que tendem a reajustar contratos anualmente.
 
-Para análises complementares, os arquivos `output/ipca_mensal.png`,
-`output/ipca_12m.png`, `output/ipca_sazonal.png` e
-`output/ipca_contribuicoes.png` são gerados automaticamente a cada
-renderização, prontos para inserção em apresentações ou relatórios externos.
-O parâmetro `execute: freeze: auto` garante que os chunks sejam
-re-executados somente quando os arquivos fonte (`R/coleta.R`,
-`R/tratamento.R`, `R/graficos.R`) ou este documento forem modificados,
-economizando chamadas desnecessárias às APIs.
 
 ---
 
@@ -337,7 +323,7 @@ economizando chamadas desnecessárias às APIs.
 ---
 
 ::: {style="font-size: 0.85em; color: #555; margin-top: 2em;"}
-**Boletim Macroeconômico Semanal** — Semana de referência: `r format(Sys.Date(), "%Y/%m/%d")`
+**Boletim IPCA** — Semana de referência: `r format(Sys.Date(), "%Y/%m/%d")`
 
 Elaborado por Raimundo Casé — economista | economistacase@gmail.com
 
