@@ -52,7 +52,7 @@ se ausentes, via `install.packages` no chunk `setup`):
 
 ```r
 c("rbcb", "sidrar", "dplyr", "tidyr", "lubridate",
-  "slider", "ggplot2", "scales", "knitr")
+  "slider", "ggplot2", "scales", "knitr", "httr")
 ```
 
 > **Nota:** `rbcb` está no CRAN desde a versão 0.1.14. Caso a instalação

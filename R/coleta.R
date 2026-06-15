@@ -15,6 +15,7 @@ library(sidrar)
 library(dplyr)
 library(tidyr)
 library(lubridate)
+library(httr)
 
 
 # -----------------------------------------------------------------------------
@@ -168,6 +169,12 @@ coletar_ipca_grupos <- function(
   c315_param     <- paste(codigos_grupos, collapse = ",")
 
   periodo_param  <- paste0(data_inicio, "-", data_fim)
+
+  # WAF da API SIDRA rejeita requisições sem User-Agent de navegador
+  # (comum em runners de CI/cloud, ex.: GitHub Actions)
+  httr::set_config(httr::add_headers(
+    `User-Agent` = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+  ))
 
   # ── Chamada 1: variação mensal (variável 63) ──────────────────────────────
   raw_variacao <- sidrar::get_sidra(
