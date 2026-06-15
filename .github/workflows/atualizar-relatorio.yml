@@ -26,7 +26,7 @@ jobs:
 
       - name: Instalar pacotes R
         run: |
-          Rscript -e 'install.packages(c("rbcb","sidrar","dplyr","tidyr","lubridate","slider","ggplot2","scales","knitr"))'
+          Rscript -e 'install.packages(c("rbcb","sidrar","dplyr","tidyr","lubridate","slider","ggplot2","scales","knitr","rmarkdown"))'
 
       - name: Renderizar relatório com dados atualizados
         run: quarto render relatorio_ipca.qmd --cache-refresh
