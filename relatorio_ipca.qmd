@@ -29,12 +29,12 @@ df_meta_m   <- preparar_meta_mensal(ipca_12m, meta_raw)
 # ── Escalares para inline code ───────────────────────────────────────────────
 # Mês de referência
 ref_data        <- max(ipca_raw$data, na.rm = TRUE)
-ref_label       <- format(ref_data, "%B de %Y")          # "abril de 2025"
-ref_label_curto <- format(ref_data, "%b/%Y")             # "abr/2025"
+ref_label       <- formatar_data_ptbr(ref_data, "extenso")  # "abril de 2025"
+ref_label_curto <- formatar_data_ptbr(ref_data, "abrev")     # "abr/2025"
 
 # Mês anterior
 ant_data        <- ref_data - months(1)
-ant_label_curto <- format(ant_data, "%b/%Y")
+ant_label_curto <- formatar_data_ptbr(ant_data, "abrev")
 
 # IPCA mensal
 ultimo_mm   <- dplyr::filter(ipca_raw, data == ref_data) |> dplyr::pull(ipca_mm)

@@ -18,6 +18,51 @@ library(lubridate)
 library(slider)
 
 
+# ── Nomes dos meses em pt-BR (independente do locale do sistema) ────────────
+.MESES_PTBR_EXTENSO <- c(
+  "janeiro", "fevereiro", "março", "abril", "maio", "junho",
+  "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"
+)
+
+.MESES_PTBR_ABREV <- c(
+  "jan", "fev", "mar", "abr", "mai", "jun",
+  "jul", "ago", "set", "out", "nov", "dez"
+)
+
+
+# -----------------------------------------------------------------------------
+#' Formata uma data em pt-BR, sem depender do locale do sistema
+#'
+#' \code{format(data, "%B")} e \code{format(data, "%b")} dependem do locale
+#' \code{LC_TIME} do sistema operacional, que em ambientes de CI (ex.:
+#' GitHub Actions) é tipicamente inglês — produzindo "May" em vez de "maio".
+#' Esta função usa uma tabela fixa de nomes em português.
+#'
+#' @param data \code{Date}.
+#' @param formato \code{"extenso"} -> \code{"maio de 2026"};
+#'   \code{"abrev"} -> \code{"mai/2026"}.
+#'
+#' @return \code{character}.
+#'
+#' @examples
+#' \dontrun{
+#'   formatar_data_ptbr(as.Date("2026-05-01"), "extenso")  # "maio de 2026"
+#'   formatar_data_ptbr(as.Date("2026-05-01"), "abrev")    # "mai/2026"
+#' }
+# -----------------------------------------------------------------------------
+formatar_data_ptbr <- function(data, formato = c("extenso", "abrev")) {
+  formato <- match.arg(formato)
+  mes <- lubridate::month(data)
+  ano <- lubridate::year(data)
+
+  if (formato == "extenso") {
+    sprintf("%s de %d", .MESES_PTBR_EXTENSO[mes], ano)
+  } else {
+    sprintf("%s/%d", .MESES_PTBR_ABREV[mes], ano)
+  }
+}
+
+
 # -----------------------------------------------------------------------------
 #' Calcula o IPCA acumulado em 12 meses (janela móvel)
 #'
