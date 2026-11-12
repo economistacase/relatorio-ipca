@@ -47,24 +47,80 @@ coletar_ipca_mensal <- function(
     data_inicio = "1994-07-01",
     data_fim    = as.character(Sys.Date())
 ) {
-  serie_bruta <- rbcb::get_series(
+  # A API do SGS trunca respostas muito longas e descarta silenciosamente as
+  # observações mais recentes: um pedido único de 1994-07 até hoje devolve a
+  # série até o penúltimo mês, deixando o relatório um mês defasado. Baixar em
+  # janelas evita o truncamento (ver .baixar_sgs_em_janelas).
+  resultado <- .baixar_sgs_em_janelas(
     code       = 433,
-    start_date = data_inicio,
-    end_date   = data_fim,
-    as         = "tibble"
-  )
-
-  resultado <- serie_bruta |>
-    dplyr::rename(
-      data    = date,
-      ipca_mm = `433`
-    ) |>
-    dplyr::mutate(
-      data = as.Date(data)
-    ) |>
-    dplyr::arrange(data)
+    data_inicio = data_inicio,
+    data_fim    = data_fim
+  ) |>
+    dplyr::rename(ipca_mm = valor)
 
   resultado
+}
+
+
+# -----------------------------------------------------------------------------
+#' Baixa uma série do SGS/BCB em janelas, evitando truncamento da API
+#'
+#' A API do SGS impõe um limite de observações por requisição. Quando ele é
+#' excedido, a resposta vem truncada no fim da série — sem erro e sem aviso —,
+#' omitindo justamente os meses mais recentes. Esta função quebra o intervalo
+#' solicitado em janelas de \code{anos_por_janela} anos, consulta cada uma
+#' separadamente e reúne os resultados, deduplicando sobreposições.
+#'
+#' @param code Código numérico da série no SGS.
+#' @param data_inicio Data de início no formato "YYYY-MM-DD".
+#' @param data_fim Data de fim no formato "YYYY-MM-DD".
+#' @param anos_por_janela Tamanho de cada janela, em anos. Padrão: 10.
+#'
+#' @return Um \code{tibble} com as colunas \code{data} e \code{valor}.
+#'
+#' @keywords internal
+# -----------------------------------------------------------------------------
+.baixar_sgs_em_janelas <- function(
+    code,
+    data_inicio,
+    data_fim,
+    anos_por_janela = 10L
+) {
+  inicio <- as.Date(data_inicio)
+  fim    <- as.Date(data_fim)
+
+  if (is.na(inicio) || is.na(fim) || inicio > fim) {
+    stop("Intervalo inválido: verifique data_inicio e data_fim.", call. = FALSE)
+  }
+
+  inicios <- seq(inicio, fim, by = paste(anos_por_janela, "years"))
+  fins    <- c(inicios[-1] - 1L, fim)
+
+  pedacos <- Map(
+    function(ini, f) {
+      bruto <- rbcb::get_series(
+        code       = code,
+        start_date = as.character(ini),
+        end_date   = as.character(f),
+        as         = "tibble"
+      )
+
+      # get_series nomeia a coluna de valores com o próprio código da série
+      bruto |>
+        dplyr::as_tibble() |>
+        stats::setNames(c("data", "valor")) |>
+        dplyr::mutate(
+          data  = as.Date(data),
+          valor = as.double(valor)
+        )
+    },
+    inicios,
+    fins
+  )
+
+  dplyr::bind_rows(pedacos) |>
+    dplyr::distinct(data, .keep_all = TRUE) |>
+    dplyr::arrange(data)
 }
 
 
@@ -96,22 +152,12 @@ coletar_meta_inflacao <- function(
     data_inicio = "1999-01-01",
     data_fim    = as.character(Sys.Date())
 ) {
-  serie_bruta <- rbcb::get_series(
-    code       = 13521,
-    start_date = data_inicio,
-    end_date   = data_fim,
-    as         = "tibble"
-  )
-
-  resultado <- serie_bruta |>
-    dplyr::rename(
-      data           = date,
-      meta_inflacao  = `13521`
-    ) |>
-    dplyr::mutate(
-      data = as.Date(data)
-    ) |>
-    dplyr::arrange(data)
+  resultado <- .baixar_sgs_em_janelas(
+    code        = 13521,
+    data_inicio = data_inicio,
+    data_fim    = data_fim
+  ) |>
+    dplyr::rename(meta_inflacao = valor)
 
   resultado
 }
