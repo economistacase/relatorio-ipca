@@ -218,9 +218,7 @@ coletar_ipca_grupos <- function(
 
   # WAF da API SIDRA rejeita requisições sem User-Agent de navegador
   # (comum em runners de CI/cloud, ex.: GitHub Actions)
-  httr::set_config(httr::add_headers(
-    `User-Agent` = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
-  ))
+  .usar_user_agent_navegador()
 
   # ── Chamada 1: variação mensal (variável 63) ──────────────────────────────
   raw_variacao <- sidrar::get_sidra(
@@ -273,4 +271,422 @@ coletar_ipca_grupos <- function(
     dplyr::arrange(data, grupo_cod)
 
   resultado
+}
+
+
+# -----------------------------------------------------------------------------
+#' Define um User-Agent de navegador para as chamadas à API SIDRA
+#'
+#' O WAF da API SIDRA rejeita requisições sem User-Agent de navegador, o que
+#' derruba a coleta em runners de CI/cloud (ex.: GitHub Actions).
+#'
+#' @return \code{NULL}, invisivelmente. Chamada por efeito colateral.
+#'
+#' @keywords internal
+# -----------------------------------------------------------------------------
+.usar_user_agent_navegador <- function() {
+  httr::set_config(httr::add_headers(
+    `User-Agent` = paste0(
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ",
+      "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+    )
+  ))
+  invisible(NULL)
+}
+
+
+# -----------------------------------------------------------------------------
+#' Extrai o prefixo numérico do rótulo hierárquico do IBGE
+#'
+#' Os rótulos da classificação c315 carregam o código hierárquico antes do
+#' primeiro ponto: \code{"1101053.Feijão - macáçar"} -> \code{"1101053"}.
+#' Rótulos sem prefixo numérico (como \code{"Índice geral"}) devolvem
+#' \code{""}.
+#'
+#' @param rotulo \code{character}.
+#'
+#' @return \code{character} com o prefixo, ou \code{""}.
+#'
+#' @keywords internal
+# -----------------------------------------------------------------------------
+.prefixo_c315 <- function(rotulo) {
+  partes  <- strsplit(as.character(rotulo), ".", fixed = TRUE)
+  prefixo <- vapply(
+    partes,
+    function(x) if (length(x) == 0L) "" else x[[1L]],
+    character(1L)
+  )
+  ifelse(grepl("^[0-9]+$", prefixo), prefixo, "")
+}
+
+
+# -----------------------------------------------------------------------------
+#' Classifica o nível hierárquico de um rótulo da classificação c315
+#'
+#' O nível é determinado pela quantidade de dígitos do prefixo numérico:
+#' 1 dígito = grupo, 2 = subgrupo, 4 = item, 7 = subitem. Sem prefixo
+#' numérico, trata-se do índice geral.
+#'
+#' @param rotulo \code{character} — rótulo completo do IBGE.
+#'
+#' @return \code{character} com um de: \code{"geral"}, \code{"grupo"},
+#'   \code{"subgrupo"}, \code{"item"}, \code{"subitem"} ou \code{"outro"}.
+#'
+#' @keywords internal
+# -----------------------------------------------------------------------------
+.nivel_c315 <- function(rotulo) {
+  n <- nchar(.prefixo_c315(rotulo))
+
+  dplyr::case_when(
+    n == 0L ~ "geral",
+    n == 1L ~ "grupo",
+    n == 2L ~ "subgrupo",
+    n == 4L ~ "item",
+    n == 7L ~ "subitem",
+    TRUE    ~ "outro"
+  )
+}
+
+
+# -----------------------------------------------------------------------------
+#' Remove o prefixo numérico do rótulo hierárquico do IBGE
+#'
+#' \code{"1101053.Feijão - macáçar (fradinho)"} ->
+#' \code{"Feijão - macáçar (fradinho)"}. Rótulos sem prefixo numérico são
+#' devolvidos inalterados.
+#'
+#' @param rotulo \code{character}.
+#'
+#' @return \code{character} sem o prefixo.
+#'
+#' @keywords internal
+# -----------------------------------------------------------------------------
+.rotulo_sem_prefixo <- function(rotulo) {
+  rotulo  <- as.character(rotulo)
+  prefixo <- .prefixo_c315(rotulo)
+
+  ifelse(
+    nzchar(prefixo),
+    substring(rotulo, nchar(prefixo) + 2L),
+    rotulo
+  )
+}
+
+
+# =============================================================================
+# Catálogo de séries do SGS/BCB usadas nas análises complementares
+#
+# Os códigos abaixo foram conferidos contra a divulgação de outubro/2026:
+#   - a média dos cinco núcleos reproduz 0,36% (set/26) e 0,22% (out/26),
+#     e 4,50% no acumulado em 12 meses, valores reportados pelo mercado;
+#   - a série 10844 reproduz a desaceleração de serviços de 0,61% para 0,11%;
+#   - a série 21379 reproduz o índice de difusão de 54,9% para 61,3%;
+#   - livres (11428) e monitorados (4449), ponderados, reconstroem o índice
+#     cheio em set/26 (0,82%) e out/26 (0,14%).
+# =============================================================================
+
+#' Cinco núcleos de inflação acompanhados pelo BCB (Estudo Especial 102/2021)
+NUCLEOS_SGS <- c(
+  "MS"  = 4466L,    # médias aparadas com suavização
+  "EX0" = 11427L,   # exclusão — EX0
+  "EX3" = 27839L,   # exclusão — EX3
+  "DP"  = 16122L,   # dupla ponderação
+  "P55" = 28750L    # percentil 55
+)
+
+#' Rótulos extensos dos núcleos, para legendas e tabelas
+NUCLEOS_ROTULOS <- c(
+  "MS"  = "Médias aparadas com suavização",
+  "EX0" = "Exclusão EX0",
+  "EX3" = "Exclusão EX3",
+  "DP"  = "Dupla ponderação",
+  "P55" = "Percentil 55"
+)
+
+#' Decomposição dos preços livres por durabilidade do bem, mais serviços
+CLASSIFICACAO_SGS <- c(
+  "Bens não duráveis" = 10841L,
+  "Bens semiduráveis" = 10842L,
+  "Bens duráveis"     = 10843L,
+  "Serviços"          = 10844L
+)
+
+#' Preços livres versus preços monitorados (administrados)
+LIVRES_MONITORADOS_SGS <- c(
+  "Preços livres"      = 11428L,
+  "Preços monitorados" = 4449L
+)
+
+#' Índice de difusão do IPCA (% de subitens com variação positiva)
+DIFUSAO_SGS <- 21379L
+
+#' INPC — variação percentual mensal
+INPC_SGS <- 188L
+
+
+# -----------------------------------------------------------------------------
+#' Coleta um conjunto nomeado de séries do SGS/BCB em formato longo
+#'
+#' Percorre um vetor nomeado de códigos do SGS, baixa cada série com
+#' \code{.baixar_sgs_em_janelas()} (imune ao truncamento da API) e empilha os
+#' resultados em um único \code{tibble} no formato longo.
+#'
+#' @param series Vetor nomeado de códigos do SGS. Os nomes viram rótulos na
+#'   coluna \code{serie}. Ex.: \code{c("Serviços" = 10844)}.
+#' @param data_inicio Data de início no formato "YYYY-MM-DD".
+#'   Padrão: \code{"2004-01-01"}.
+#' @param data_fim Data de fim no formato "YYYY-MM-DD". Padrão: hoje.
+#'
+#' @return \code{tibble} com as colunas \code{serie} (\code{character}),
+#'   \code{codigo} (\code{integer}), \code{data} (\code{Date}) e
+#'   \code{valor} (\code{double}), ordenado por série e data.
+#'
+#' @examples
+#' \dontrun{
+#'   nucleos <- coletar_series_sgs(NUCLEOS_SGS, data_inicio = "2015-01-01")
+#' }
+# -----------------------------------------------------------------------------
+coletar_series_sgs <- function(
+    series,
+    data_inicio = "2004-01-01",
+    data_fim    = as.character(Sys.Date())
+) {
+  stopifnot(
+    is.numeric(series), length(series) > 0L,
+    !is.null(names(series)), all(nzchar(names(series)))
+  )
+
+  pedacos <- Map(
+    function(rotulo, codigo) {
+      .baixar_sgs_em_janelas(
+        code        = codigo,
+        data_inicio = data_inicio,
+        data_fim    = data_fim
+      ) |>
+        dplyr::mutate(
+          serie  = rotulo,
+          codigo = as.integer(codigo),
+          .before = 1L
+        )
+    },
+    names(series),
+    unname(series)
+  )
+
+  dplyr::bind_rows(pedacos) |>
+    dplyr::arrange(serie, data)
+}
+
+
+# -----------------------------------------------------------------------------
+#' Coleta o IPCA na classificação c315 em qualquer nível de desagregação
+#'
+#' Generaliza \code{coletar_ipca_grupos()} para toda a hierarquia da tabela
+#' 7060: índice geral, 9 grupos, 19 subgrupos, 51 itens e 377 subitens.
+#'
+#' O nível de cada linha é inferido do próprio rótulo do IBGE, que carrega o
+#' código hierárquico como prefixo: \code{"1.Alimentação e bebidas"} (grupo),
+#' \code{"11.Alimentação no domicílio"} (subgrupo), \code{"1101.Cereais..."}
+#' (item) e \code{"1101053.Feijão..."} (subitem). O número de dígitos do
+#' prefixo identifica o nível sem depender de uma tabela de códigos fixa.
+#'
+#' @param data_inicio Período inicial no formato \code{"YYYYMM"}.
+#' @param data_fim Período final no formato \code{"YYYYMM"}.
+#'   Padrão: mês corrente.
+#' @param codigos Códigos c315 a consultar, separados por vírgula, ou
+#'   \code{"all"} para toda a hierarquia. Padrão: \code{"all"}.
+#'
+#' @return \code{tibble} com as colunas \code{data}, \code{cod},
+#'   \code{nome_completo} (rótulo do IBGE, com prefixo numérico),
+#'   \code{nome} (rótulo limpo, sem prefixo), \code{nivel}
+#'   (\code{"geral"}, \code{"grupo"}, \code{"subgrupo"}, \code{"item"} ou
+#'   \code{"subitem"}), \code{variacao} e \code{peso}.
+#'
+#' @examples
+#' \dontrun{
+#'   # Toda a hierarquia nos últimos 13 meses
+#'   h <- coletar_ipca_c315("202510", "202610")
+#'   dplyr::filter(h, nivel == "subitem")
+#' }
+# -----------------------------------------------------------------------------
+coletar_ipca_c315 <- function(
+    data_inicio,
+    data_fim = format(Sys.Date(), "%Y%m"),
+    codigos  = "all"
+) {
+  .usar_user_agent_navegador()
+
+  periodo <- paste0(data_inicio, "-", data_fim)
+
+  bruto <- sidrar::get_sidra(
+    api = paste0(
+      "/t/7060/n1/all",
+      "/v/63,66",
+      "/p/", periodo,
+      "/c315/", codigos
+    )
+  )
+
+  longo <- bruto |>
+    dplyr::as_tibble() |>
+    dplyr::select(
+      periodo       = `Mês (Código)`,
+      nome_completo = `Geral, grupo, subgrupo, item e subitem`,
+      cod           = `Geral, grupo, subgrupo, item e subitem (Código)`,
+      variavel      = `Variável`,
+      valor         = Valor
+    ) |>
+    dplyr::mutate(
+      data  = lubridate::ym(periodo),
+      cod   = as.character(cod),
+      valor = as.double(valor),
+      campo = dplyr::if_else(
+        grepl("Peso", variavel, fixed = TRUE), "peso", "variacao"
+      )
+    )
+
+  longo |>
+    dplyr::select(data, cod, nome_completo, campo, valor) |>
+    tidyr::pivot_wider(names_from = campo, values_from = valor) |>
+    dplyr::mutate(
+      nivel = .nivel_c315(nome_completo),
+      nome  = .rotulo_sem_prefixo(nome_completo)
+    ) |>
+    dplyr::select(data, cod, nome_completo, nome, nivel, variacao, peso) |>
+    dplyr::arrange(data, cod)
+}
+
+
+# -----------------------------------------------------------------------------
+#' Coleta o IPCA do índice geral para as 16 áreas pesquisadas pelo IBGE
+#'
+#' O IPCA é apurado em 16 áreas: 10 regiões metropolitanas (nível territorial
+#' \code{n7}) e 6 municípios (nível \code{n6}). As duas consultas são feitas
+#' separadamente e normalizadas em uma coluna única \code{area}.
+#'
+#' @param data_inicio Período inicial no formato \code{"YYYYMM"}.
+#' @param data_fim Período final no formato \code{"YYYYMM"}.
+#'   Padrão: mês corrente.
+#'
+#' @return \code{tibble} com \code{data}, \code{area} (\code{character}),
+#'   \code{tipo} (\code{"Região metropolitana"} ou \code{"Município"}) e
+#'   \code{variacao} (\code{double}).
+#'
+#' @examples
+#' \dontrun{
+#'   areas <- coletar_ipca_areas("202610", "202610")
+#'   dplyr::arrange(areas, dplyr::desc(variacao))
+#' }
+# -----------------------------------------------------------------------------
+coletar_ipca_areas <- function(
+    data_inicio,
+    data_fim = format(Sys.Date(), "%Y%m")
+) {
+  .usar_user_agent_navegador()
+
+  periodo <- paste0(data_inicio, "-", data_fim)
+
+  .consultar <- function(nivel, coluna_area, tipo) {
+    bruto <- sidrar::get_sidra(
+      api = paste0(
+        "/t/7060/", nivel, "/all",
+        "/v/63",
+        "/p/", periodo,
+        "/c315/7169"
+      )
+    ) |>
+      dplyr::as_tibble()
+
+    bruto |>
+      dplyr::transmute(
+        data     = lubridate::ym(`Mês (Código)`),
+        area     = as.character(.data[[coluna_area]]),
+        tipo     = tipo,
+        variacao = as.double(Valor)
+      )
+  }
+
+  rm_areas  <- .consultar("n7", "Região Metropolitana até 2020",
+                          "Região metropolitana")
+  mun_areas <- .consultar("n6", "Município", "Município")
+
+  dplyr::bind_rows(rm_areas, mun_areas) |>
+    dplyr::filter(!is.na(variacao)) |>
+    dplyr::arrange(data, area)
+}
+
+
+# -----------------------------------------------------------------------------
+#' Coleta as expectativas do boletim Focus para o IPCA mensal
+#'
+#' Consulta a API de expectativas de mercado do BCB e devolve, para cada mês
+#' de referência, a projeção mediana mais recente anterior à divulgação do
+#' resultado efetivo. Serve para medir a \emph{surpresa inflacionária}:
+#' a diferença entre o IPCA realizado e o que o mercado projetava.
+#'
+#' Usa \code{baseCalculo == 0}, que considera todas as instituições que
+#' responderam nos últimos 30 dias (amostra mais ampla).
+#'
+#' @param data_inicio Data inicial das coletas do Focus ("YYYY-MM-DD").
+#'   Padrão: 24 meses atrás.
+#'
+#' @return \code{tibble} com \code{data} (mês de referência, \code{Date}),
+#'   \code{mediana}, \code{media}, \code{n_respondentes} e
+#'   \code{data_coleta} (data da última coleta usada).
+#'   Devolve \code{NULL} se a API estiver indisponível.
+#'
+#' @examples
+#' \dontrun{
+#'   focus <- coletar_focus_ipca()
+#' }
+# -----------------------------------------------------------------------------
+coletar_focus_ipca <- function(
+    data_inicio = as.character(Sys.Date() - 760L)
+) {
+  bruto <- tryCatch(
+    rbcb::get_market_expectations(
+      type       = "monthly",
+      indic      = "IPCA",
+      start_date = data_inicio,
+      `$top`     = 10000L
+    ),
+    error = function(e) {
+      warning(
+        sprintf("[coletar_focus_ipca] Focus indisponível: %s",
+                conditionMessage(e)),
+        call. = FALSE
+      )
+      NULL
+    }
+  )
+
+  if (is.null(bruto) || nrow(bruto) == 0L) return(NULL)
+
+  bruto |>
+    dplyr::as_tibble() |>
+    dplyr::filter(baseCalculo == 0L) |>
+    dplyr::mutate(
+      data_coleta = as.Date(Data),
+      data        = lubridate::ym(
+        paste0(substr(DataReferencia, 4L, 7L), substr(DataReferencia, 1L, 2L))
+      )
+    ) |>
+    # Só interessam meses de referência já divulgados.
+    dplyr::filter(data < lubridate::floor_date(Sys.Date(), "month")) |>
+    # A projeção válida é a última coletada ANTES da divulgação. O IBGE
+    # divulga o IPCA por volta do dia 10 do mês seguinte ao de referência;
+    # o corte no dia 8 é conservador e evita contaminar a "expectativa" com
+    # revisões feitas depois de o número já ser conhecido.
+    dplyr::filter(data_coleta < data %m+% months(1L) + 7L) |>
+    dplyr::group_by(data) |>
+    dplyr::slice_max(data_coleta, n = 1L, with_ties = FALSE) |>
+    dplyr::ungroup() |>
+    dplyr::transmute(
+      data,
+      mediana        = as.double(Mediana),
+      media          = as.double(Media),
+      n_respondentes = as.integer(numeroRespondentes),
+      data_coleta
+    ) |>
+    dplyr::arrange(data)
 }

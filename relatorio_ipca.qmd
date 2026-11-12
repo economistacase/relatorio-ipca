@@ -19,6 +19,34 @@ ipca_raw   <- coletar_ipca_mensal()
 meta_raw   <- coletar_meta_inflacao()
 grupos_raw <- coletar_ipca_grupos()
 
+# Mês de referência: define as janelas das demais consultas
+ref_data <- max(ipca_raw$data, na.rm = TRUE)
+p_fim    <- format(ref_data, "%Y%m")
+
+# Hierarquia completa (grupos, subgrupos, itens e subitens) nos últimos 13
+# meses — base da abertura por item
+c315_recente <- coletar_ipca_c315(
+  data_inicio = format(ref_data %m-% months(12L), "%Y%m"),
+  data_fim    = p_fim
+)
+
+# Alimentação dentro/fora do domicílio em janela longa, para o acumulado 12m
+c315_alimentacao <- coletar_ipca_c315(
+  data_inicio = format(ref_data %m-% months(83L), "%Y%m"),
+  data_fim    = p_fim,
+  codigos     = "7171,7432"
+)
+
+areas_raw <- coletar_ipca_areas(data_inicio = p_fim, data_fim = p_fim)
+
+# Séries analíticas do SGS/BCB
+nucleos_raw  <- coletar_series_sgs(NUCLEOS_SGS,            data_inicio = "2015-01-01")
+classif_raw  <- coletar_series_sgs(CLASSIFICACAO_SGS,      data_inicio = "2015-01-01")
+livres_raw   <- coletar_series_sgs(LIVRES_MONITORADOS_SGS, data_inicio = "2015-01-01")
+difusao_raw  <- coletar_series_sgs(c("Difusão" = DIFUSAO_SGS), data_inicio = "2015-01-01")
+inpc_raw     <- coletar_series_sgs(c("INPC"    = INPC_SGS),    data_inicio = "2015-01-01")
+focus_raw    <- coletar_focus_ipca()
+
 # ── Tratamento ───────────────────────────────────────────────────────────────
 ipca_12m    <- calcular_acumulado_12m(ipca_raw)
 ipca_ano    <- calcular_acumulado_ano(ipca_raw)
@@ -26,13 +54,22 @@ df_sazonal  <- preparar_sazonal(ipca_raw, ano_inicio = 2015)
 contrib     <- preparar_contribuicoes(grupos_raw)
 df_meta_m   <- preparar_meta_mensal(ipca_12m, meta_raw)
 
-# ── Escalares para inline code ───────────────────────────────────────────────
-# Mês de referência
-ref_data        <- max(ipca_raw$data, na.rm = TRUE)
-ref_label       <- formatar_data_ptbr(ref_data, "extenso")  # "abril de 2025"
-ref_label_curto <- formatar_data_ptbr(ref_data, "abrev")     # "abr/2025"
+top_itens   <- preparar_top_itens(c315_recente, n = 8L)
+alimentacao <- acumular_12m_por_serie(
+  preparar_alimentacao(c315_alimentacao),
+  col_grupo = "nome", col_valor = "variacao"
+)
+nucleos     <- preparar_nucleos(nucleos_raw)
+classif     <- acumular_12m_por_serie(classif_raw)
+livres      <- acumular_12m_por_serie(livres_raw)
+inpc        <- acumular_12m_por_serie(inpc_raw)
+areas       <- preparar_areas(areas_raw)
+surpresa    <- preparar_surpresa_focus(focus_raw, ipca_raw)
 
-# Mês anterior
+# ── Escalares para inline code ───────────────────────────────────────────────
+ref_label       <- formatar_data_ptbr(ref_data, "extenso")  # "outubro de 2026"
+ref_label_curto <- formatar_data_ptbr(ref_data, "abrev")    # "out/2026"
+
 ant_data        <- ref_data - months(1)
 ant_label_curto <- formatar_data_ptbr(ant_data, "abrev")
 
@@ -70,6 +107,62 @@ menor_contrib  <- contrib$mes_atual |>
   dplyr::slice_min(contribuicao, n = 1L, with_ties = FALSE)
 soma_contrib   <- sum(contrib$mes_atual$contribuicao, na.rm = TRUE)
 
+# Verificação de consistência do mês de referência
+check_mes   <- dplyr::filter(contrib$sanity, data == ref_data)
+desvio_soma <- abs(check_mes$soma_contribuicoes - ultimo_mm)
+desvio_peso <- abs(check_mes$soma_pesos - 100)
+check_ok    <- isTRUE(desvio_soma < 0.05) && isTRUE(check_mes$ok_pesos)
+
+# Itens de maior impacto
+item_alta  <- dplyr::slice_max(top_itens$altas,  contribuicao, n = 1L, with_ties = FALSE)
+item_baixa <- dplyr::slice_min(top_itens$baixas, contribuicao, n = 1L, with_ties = FALSE)
+
+# Alimentação dentro / fora
+alim_dom  <- alimentacao |>
+  dplyr::filter(cod == "7171", data == ref_data)
+alim_fora <- alimentacao |>
+  dplyr::filter(cod == "7432", data == ref_data)
+
+# Núcleos
+nucleo_media_mes <- nucleos$mes_atual |>
+  dplyr::filter(serie == "Média dos núcleos")
+nucleo_media_ant <- nucleos$series |>
+  dplyr::filter(serie == "Média dos núcleos", data == ant_data)
+nucleo_mm        <- nucleo_media_mes$valor
+nucleo_12m       <- nucleo_media_mes$acum_12m
+nucleo_mm_ant    <- nucleo_media_ant$valor
+
+# Natureza dos preços
+.serie_mes <- function(df, nome_serie) {
+  dplyr::filter(df, serie == nome_serie, data == ref_data)
+}
+servicos    <- .serie_mes(classif, "Serviços")
+duraveis    <- .serie_mes(classif, "Bens duráveis")
+nao_dur     <- .serie_mes(classif, "Bens não duráveis")
+semi_dur    <- .serie_mes(classif, "Bens semiduráveis")
+servicos_ant <- dplyr::filter(classif, serie == "Serviços", data == ant_data)
+
+pr_livres      <- .serie_mes(livres, "Preços livres")
+pr_monitorados <- .serie_mes(livres, "Preços monitorados")
+
+# Difusão
+difusao_mes <- dplyr::filter(difusao_raw, data == ref_data)
+difusao_ant <- dplyr::filter(difusao_raw, data == ant_data)
+
+# Surpresa Focus
+tem_focus <- !is.null(surpresa) && any(surpresa$data == ref_data)
+if (tem_focus) {
+  surpresa_mes <- dplyr::filter(surpresa, data == ref_data)
+}
+
+# Áreas
+area_maior <- dplyr::slice_max(areas, variacao, n = 1L, with_ties = FALSE)
+area_menor <- dplyr::slice_min(areas, variacao, n = 1L, with_ties = FALSE)
+amplitude_areas <- area_maior$variacao - area_menor$variacao
+
+# INPC
+inpc_mes <- dplyr::filter(inpc, data == ref_data)
+
 # Funções auxiliares de formatação (inline sem poluição)
 fmt_pp  <- function(x, digits = 2L) format(round(x, digits), nsmall = digits)
 fmt_pct <- function(x, digits = 2L) paste0(fmt_pp(x, digits), "%")
@@ -93,10 +186,16 @@ revela o pulso imediato dos preços; o acumulado em doze meses é o horizonte
 pelo qual o Conselho Monetário Nacional (CMN) avalia o cumprimento da meta; o
 acumulado no ano captura a trajetória corrente; e a decomposição por grupos de
 despesa — Alimentação e Bebidas, Habitação, Transportes, entre outros —
-permite identificar de onde vem a pressão inflacionária. Este relatório
-organiza essas quatro perspectivas em painéis integrados, com dados direto do
-SGS/BCB (série 433 para o IPCA, série 13521 para a meta) e da API SIDRA/IBGE
-(tabela 7060 para os grupos).
+permite identificar de onde vem a pressão inflacionária.
+
+Este relatório vai além da leitura do índice cheio. Depois do panorama
+mensal, ele desce ao nível do **subitem** para separar o que de fato moveu o
+índice daquilo que apenas variou muito; isola o **miolo da inflação** pelos
+núcleos acompanhados pelo Banco Central, pela natureza dos bens e pela
+difusão; confronta o resultado com o que o mercado **projetava**; e verifica
+quanto do número nacional é choque **local**. São dimensões que a divulgação
+oficial do IBGE não cobre — e são elas que dizem se um resultado benigno
+significa desinflação ou apenas um alívio passageiro.
 
 Os dados mais recentes disponíveis são de **`r ref_label`**. Naquele mês, o
 IPCA registrou variação de **`r fmt_pct(ultimo_mm)`**, enquanto o acumulado
@@ -203,8 +302,7 @@ A comparação visual entre anos revela também ciclos de política monetária: 
 anos de aperto (Selic em alta), a linha do IPCA mensal tende a ficar abaixo
 da média histórica especialmente nos meses de maior inércia; em anos de
 afrouxamento ou de choques externos, a sazonalidade habitual pode ser
-amplificada ou invertida. O gráfico interativo (ao expandir o código acima) dá
-acesso a todos os valores subjacentes para análise mais granular.
+amplificada ou invertida.
 
 ---
 
@@ -247,10 +345,6 @@ foi **`r maior_contrib$grupo`**
 (`r fmt_sinal(maior_contrib$contribuicao[1])`), enquanto
 **`r menor_contrib$grupo`** registrou a
 **menor contribuição** (`r fmt_sinal(menor_contrib$contribuicao[1])`).
-A soma das contribuições dos nove grupos totaliza
-**`r fmt_pp(soma_contrib)` p.p.**, o que deve aproximar-se da variação mensal
-do índice cheio (`r fmt_pct(ultimo_mm)`); qualquer discrepância acima de 0,05
-p.p. sinaliza problema de consistência nos dados da API.
 
 A contribuição de um grupo não é sua variação bruta, mas o produto da variação
 pelo peso no índice, dividido por 100 — a fórmula `contribuição = variação ×
@@ -259,6 +353,361 @@ contribuir menos do que um grupo de variação moderada com peso elevado. É o
 caso típico de **Alimentação e Bebidas**, que com peso próximo a 23% pode
 dominar o resultado mensal mesmo com variação na faixa de 0,5%–1%.
 
+```{r}
+#| label: check-consistencia
+#| echo: false
+#| output: asis
+
+cat(sprintf(
+  ":::{.callout-%s}\n## Verificação de consistência — %s\n\n%s\n:::\n",
+  if (check_ok) "note" else "warning",
+  ref_label_curto,
+  paste0(
+    "Soma das contribuições dos nove grupos: **", fmt_pp(soma_contrib),
+    " p.p.**, contra variação de **", fmt_pct(ultimo_mm),
+    "** no índice cheio — desvio de ", fmt_pp(desvio_soma, 3L), " p.p. ",
+    "Soma dos pesos: **", fmt_pp(check_mes$soma_pesos),
+    "** (esperado 100, desvio de ", fmt_pp(desvio_peso, 3L), "). ",
+    if (check_ok) {
+      "Ambos dentro da tolerância; os dados da API estão consistentes."
+    } else {
+      paste0(
+        "**Fora da tolerância** (desvio de soma acima de 0,05 p.p. ou de ",
+        "pesos acima de 0,5). Trate os números desta edição com cautela e ",
+        "verifique a tabela 7060 do SIDRA."
+      )
+    }
+  )
+))
+```
+
+---
+
+## Itens de Maior Impacto {#sec-itens}
+
+A tabela de grupos responde *onde* a inflação ocorreu, mas não *o que* a
+produziu. O IPCA é apurado em 377 subitens, e o ranking que a imprensa
+costuma reproduzir — o das maiores variações — é enganoso: um subitem pode
+subir 20% e mover o índice em três centésimos, enquanto outro sobe 2% e move
+o dobro, por pesar muito mais na cesta.
+
+O gráfico abaixo ordena os subitens pela **contribuição em pontos
+percentuais**, não pela variação. Cada barra traz os dois números, para que a
+diferença entre "subiu muito" e "pesou muito" fique explícita.
+
+```{r}
+#| label: fig-top-itens
+#| fig-cap: !expr sprintf("Subitens de maior impacto no IPCA — %s", ref_label_curto)
+#| fig-height: 6
+
+g_itens <- grafico_top_itens(top_itens$combinado)
+salvar_grafico(g_itens, "ipca_top_itens", altura = 6)
+g_itens
+```
+
+Em `r ref_label_curto`, a maior pressão de alta veio de
+**`r item_alta$nome`**, que variou `r fmt_pct(item_alta$variacao)` e
+contribuiu com `r fmt_sinal(item_alta$contribuicao, 3L)`. No sentido oposto,
+**`r item_baixa$nome`** foi o maior alívio:
+`r fmt_pct(item_baixa$variacao)` de variação e
+`r fmt_sinal(item_baixa$contribuicao, 3L)` de contribuição.
+
+Vale notar a assimetria entre os dois rankings. Itens de alta variação
+costumam ser alimentos *in natura*, sujeitos a safra e clima, com pesos
+pequenos e reversão rápida. Já os alívios de maior impacto tendem a vir de
+itens de peso elevado e preço administrado ou semiadministrado — energia,
+combustíveis, tarifas —, cuja queda é decidida em reajuste e não em mercado.
+Essa distinção importa para projeção: o choque de alimento tende a se
+desfazer sozinho; o alívio tarifário, não se repete.
+
+---
+
+## Alimentação: Dentro e Fora do Domicílio {#sec-alimentacao}
+
+A divisão do grupo Alimentação em dois subgrupos separa fenômenos que só por
+coincidência andam juntos. A **alimentação no domicílio** responde a safra,
+clima, câmbio e frete — é volátil e reverte. A **alimentação fora do
+domicílio** é essencialmente serviço: responde a salários, aluguel e energia,
+tem forte inércia e quase nunca cai.
+
+```{r}
+#| label: fig-alimentacao
+#| fig-cap: "Alimentação dentro e fora do domicílio — acumulado em 12 meses"
+
+g_alim <- grafico_alimentacao(alimentacao)
+salvar_grafico(g_alim, "ipca_alimentacao")
+g_alim
+```
+
+Em `r ref_label_curto`, a alimentação no domicílio variou
+**`r fmt_pct(alim_dom$variacao)`** e a de fora do domicílio,
+**`r fmt_pct(alim_fora$variacao)`**. No acumulado em 12 meses, estão em
+`r fmt_pct(alim_dom$acum_12m)` e `r fmt_pct(alim_fora$acum_12m)`,
+respectivamente.
+
+A leitura relevante é a da distância entre as duas linhas. Quando a de
+domicílio dispara e a de fora permanece estável, trata-se de choque de
+oferta: o custo ainda não chegou ao restaurante, e a tendência é reversão.
+Quando as duas convergem para cima, o choque já virou custo contratado e
+repassado — aí a inflação de alimentos deixou de ser transitória e passou a
+alimentar a inércia.
+
+---
+
+## Núcleos de Inflação {#sec-nucleos}
+
+Nenhuma das medidas anteriores separa o movimento *persistente* dos preços do
+ruído de choques pontuais. Essa é a função dos **núcleos de inflação**:
+medidas que excluem, aparam ou reponderam os itens mais voláteis para revelar
+a tendência subjacente. O IBGE não os publica em sua divulgação; o Banco
+Central calcula e acompanha cinco deles, e é a média desses cinco que orienta
+a leitura de conjuntura.
+
+```{r}
+#| label: fig-nucleos
+#| fig-cap: "Núcleos de inflação acumulados em 12 meses, frente à meta e à banda"
+
+g_nuc <- grafico_nucleos(nucleos$series, meta_valor = meta_valor)
+salvar_grafico(g_nuc, "ipca_nucleos")
+g_nuc
+```
+
+```{r}
+#| label: tbl-nucleos
+#| tbl-cap: !expr sprintf("Núcleos de inflação — %s", ref_label_curto)
+#| echo: false
+
+nucleos$mes_atual |>
+  dplyr::mutate(
+    rotulo = dplyr::coalesce(
+      unname(NUCLEOS_ROTULOS[serie]),
+      "Média simples dos cinco"
+    ),
+    eh_media = serie == "Média dos núcleos"
+  ) |>
+  dplyr::arrange(eh_media, serie) |>
+  dplyr::transmute(
+    `Núcleo`               = ifelse(eh_media, "**Média dos núcleos**", serie),
+    `Medida`               = rotulo,
+    `Variação (% a.m.)`    = round(valor,    2L),
+    `Acumulado 12m (%)`    = round(acum_12m, 2L)
+  ) |>
+  knitr::kable(align = c("l", "l", "r", "r"))
+```
+
+Em `r ref_label_curto`, a média dos cinco núcleos ficou em
+**`r fmt_pct(nucleo_mm)`**, ante `r fmt_pct(nucleo_mm_ant)` em
+`r ant_label_curto`. No acumulado em 12 meses, a média está em
+**`r fmt_pct(nucleo_12m)`**, contra `r fmt_pct(ultimo_12m)` do índice cheio.
+
+A comparação entre as duas é o teste decisivo de qualquer leitura mensal.
+Quando o índice cheio vem abaixo dos núcleos, o alívio está concentrado em
+itens voláteis ou administrados e tende a não se sustentar. Quando os núcleos
+cedem junto com o cheio, a desinflação é de fato disseminada — e é esse o
+sinal que o Copom precisa ver antes de mudar de postura. A faixa verde no
+gráfico reproduz a banda de tolerância da meta, permitindo avaliar não só a
+direção dos núcleos, mas a distância que ainda os separa do alvo.
+
+---
+
+## Natureza dos Preços {#sec-natureza}
+
+Duas aberturas adicionais ajudam a entender *que tipo* de preço está se
+movendo. A primeira classifica os bens pela durabilidade e isola os serviços;
+a segunda separa o que é formado em mercado do que é fixado por contrato ou
+regulação.
+
+```{r}
+#| label: fig-classificacao
+#| fig-cap: "IPCA por natureza do bem — acumulado em 12 meses"
+
+g_classif <- grafico_classificacao(classif)
+salvar_grafico(g_classif, "ipca_classificacao")
+g_classif
+```
+
+Em `r ref_label_curto`, os **serviços** variaram
+**`r fmt_pct(servicos$valor)`** (contra `r fmt_pct(servicos_ant$valor)` em
+`r ant_label_curto`), acumulando `r fmt_pct(servicos$acum_12m)` em 12 meses.
+Os bens não duráveis variaram `r fmt_pct(nao_dur$valor)`, os semiduráveis
+`r fmt_pct(semi_dur$valor)` e os duráveis `r fmt_pct(duraveis$valor)`.
+
+Serviços são o componente mais inercial do índice: dependem de salário,
+reajustam-se por contrato anual e reagem com defasagem longa à política
+monetária. Por isso, sua trajetória em 12 meses é o melhor termômetro do
+estado do mercado de trabalho dentro da inflação. Bens duráveis, no extremo
+oposto, respondem a câmbio, crédito e estoque — e costumam ser os primeiros a
+desinflacionar quando os juros sobem.
+
+```{r}
+#| label: fig-livres
+#| fig-cap: "Preços livres e monitorados — acumulado em 12 meses"
+
+g_livres <- grafico_classificacao(livres)
+salvar_grafico(g_livres, "ipca_livres_monitorados")
+g_livres
+```
+
+Os **preços livres** variaram `r fmt_pct(pr_livres$valor)` no mês
+(`r fmt_pct(pr_livres$acum_12m)` em 12 meses) e os **monitorados**,
+`r fmt_pct(pr_monitorados$valor)` (`r fmt_pct(pr_monitorados$acum_12m)` em 12
+meses). Monitorados são os preços que não se formam livremente no mercado —
+energia elétrica, combustíveis, planos de saúde, transporte público, taxas
+públicas. Respondem a reajuste regulatório, bandeira tarifária e política de
+preços, não a demanda. Um mês em que o índice cheio desacelera por conta dos
+monitorados diz pouco sobre pressão inflacionária subjacente: diz apenas que
+houve decisão administrativa favorável.
+
+---
+
+## Difusão {#sec-difusao}
+
+O índice de difusão mede a proporção dos subitens do IPCA que registraram
+alta no mês. É o complemento natural dos núcleos: enquanto estes perguntam
+*quanto* a inflação persistente está rodando, a difusão pergunta *quão
+espalhada* ela está.
+
+```{r}
+#| label: fig-difusao
+#| fig-cap: "Índice de difusão do IPCA — proporção de subitens em alta"
+
+g_dif <- grafico_difusao(difusao_raw)
+salvar_grafico(g_dif, "ipca_difusao")
+g_dif
+```
+
+Em `r ref_label_curto`, a difusão ficou em
+**`r fmt_pct(difusao_mes$valor, 1L)`**, ante
+`r fmt_pct(difusao_ant$valor, 1L)` em `r ant_label_curto`.
+
+A combinação entre difusão e índice cheio é o que dá o diagnóstico. Índice
+baixo com difusão alta é o caso mais traiçoeiro: a maioria dos preços está
+subindo, e o resultado benigno veio de poucos itens de peso grande em forte
+queda — tipicamente energia ou combustível. É um alívio que não se repete, e
+que convive com pressão disseminada por baixo. O inverso — índice alto com
+difusão baixa — indica choque concentrado, de reversão mais provável.
+
+---
+
+## Surpresa Frente ao Focus {#sec-surpresa}
+
+```{r}
+#| label: fig-surpresa
+#| eval: !expr tem_focus
+#| fig-cap: "Surpresa inflacionária: IPCA realizado menos a mediana projetada no Focus"
+
+g_sur <- grafico_surpresa(surpresa)
+salvar_grafico(g_sur, "ipca_surpresa")
+g_sur
+```
+
+```{r}
+#| label: surpresa-texto
+#| echo: false
+#| output: asis
+
+if (tem_focus) {
+  cat(sprintf(
+    paste0(
+      "Em %s, o IPCA veio em **%s**, contra mediana projetada de **%s** ",
+      "pelas %d instituições que responderam ao Focus na última coleta ",
+      "anterior à divulgação (%s). A surpresa foi de **%s**.\n"
+    ),
+    ref_label_curto,
+    fmt_pct(surpresa_mes$realizado),
+    fmt_pct(surpresa_mes$projetado),
+    surpresa_mes$n_respondentes,
+    format(surpresa_mes$data_coleta, "%d/%m/%Y"),
+    fmt_sinal(surpresa_mes$surpresa)
+  ))
+} else {
+  cat(paste0(
+    "A API de expectativas de mercado do Banco Central não respondeu nesta ",
+    "edição, ou ainda não há projeção consolidada para o mês de referência. ",
+    "Esta seção será preenchida na próxima atualização.\n"
+  ))
+}
+```
+
+Nenhuma divulgação do IBGE responde à pergunta que o mercado de fato faz: o
+número veio acima ou abaixo do esperado? A surpresa inflacionária — a
+diferença entre o realizado e a mediana do Focus coletada imediatamente antes
+da divulgação — é o que move curva de juros e revisão de projeção no dia do
+anúncio. Um IPCA de 0,40% pode ser notícia boa, se o mercado esperava 0,55%,
+e ruim, se esperava 0,25%.
+
+A sequência de surpresas também informa sobre a qualidade das projeções
+correntes. Erros sistemáticos na mesma direção, mês após mês, indicam que o
+mercado ainda não incorporou alguma mudança estrutural — de política
+tarifária, de repasse cambial ou de dinâmica salarial.
+
+---
+
+## IPCA pelo Brasil {#sec-areas}
+
+O IPCA nacional é a média ponderada de 16 áreas de pesquisa: 10 regiões
+metropolitanas e 6 municípios. A dispersão entre elas separa o que é
+inflação geral do que é choque local — um reajuste de energia estadual ou de
+tarifa de ônibus municipal pode mover o índice de uma área inteira sem
+qualquer significado macroeconômico.
+
+```{r}
+#| label: fig-areas
+#| fig-cap: !expr sprintf("IPCA por área pesquisada — %s", ref_label_curto)
+#| fig-height: 6
+
+g_areas <- grafico_areas(areas, ipca_brasil = ultimo_mm)
+salvar_grafico(g_areas, "ipca_areas", altura = 6)
+g_areas
+```
+
+Em `r ref_label_curto`, a maior variação foi em **`r area_maior$area`**
+(`r fmt_pct(area_maior$variacao)`) e a menor, em **`r area_menor$area`**
+(`r fmt_pct(area_menor$variacao)`) — uma amplitude de
+**`r fmt_pp(amplitude_areas)` p.p.** entre os extremos, contra
+`r fmt_pct(ultimo_mm)` do índice nacional.
+
+Amplitudes largas pedem cautela na leitura do agregado: significam que o
+número nacional está sendo puxado por eventos que não se repetem nem se
+generalizam. Amplitudes estreitas, ao contrário, reforçam o diagnóstico de
+inflação disseminada — e conversam diretamente com o índice de difusão da
+seção anterior.
+
+---
+
+## INPC: o Contraponto {#sec-inpc}
+
+O **INPC** mede a inflação das famílias com renda de 1 a 5 salários mínimos,
+enquanto o IPCA cobre de 1 a 40. A cesta do INPC concentra mais peso em
+alimentação, transporte público e habitação, e menos em serviços pessoais e
+bens duráveis. A diferença entre os dois índices é, na prática, uma medida de
+como o mesmo choque de preços atinge de forma desigual faixas de renda
+distintas.
+
+```{r}
+#| label: tbl-inpc
+#| tbl-cap: !expr sprintf("IPCA e INPC — %s", ref_label_curto)
+#| echo: false
+
+tibble::tibble(
+  `Índice`            = c("IPCA", "INPC"),
+  `Faixa de renda`    = c("1 a 40 salários mínimos", "1 a 5 salários mínimos"),
+  `Variação (% a.m.)` = round(c(ultimo_mm,  inpc_mes$valor),    2L),
+  `Acumulado 12m (%)` = round(c(ultimo_12m, inpc_mes$acum_12m), 2L)
+) |>
+  knitr::kable(align = c("l", "l", "r", "r"))
+```
+
+Em `r ref_label_curto`, o INPC variou **`r fmt_pct(inpc_mes$valor)`**, contra
+`r fmt_pct(ultimo_mm)` do IPCA, com acumulado em 12 meses de
+`r fmt_pct(inpc_mes$acum_12m)` ante `r fmt_pct(ultimo_12m)`.
+
+Quando o INPC roda acima do IPCA, o choque corrente está concentrado em itens
+de peso maior na cesta de renda baixa — tipicamente alimentos e tarifas
+públicas —, e a inflação é regressiva: corrói mais o poder de compra de quem
+ganha menos. O INPC é também o indexador de referência para o reajuste do
+salário mínimo e de boa parte dos benefícios previdenciários, o que lhe dá
+consequência fiscal direta.
 
 ---
 
@@ -268,10 +717,6 @@ dominar o resultado mensal mesmo com variação na faixa de 0,5%–1%.
 #| label: resumo-scalars
 #| echo: false
 
-# Verificação de consistência do mês atual
-check_mes <- contrib$sanity |>
-  dplyr::filter(data == ref_data)
-
 status_banda <- if (dentro_banda) {
   paste0("dentro da banda de tolerância (", fmt_pct(meta_piso), "–",
          fmt_pct(meta_teto), ")")
@@ -280,9 +725,34 @@ status_banda <- if (dentro_banda) {
 } else {
   paste0("abaixo do piso da banda (", fmt_pct(meta_piso), ")")
 }
+
+diag_nucleo <- if (ultimo_mm < nucleo_mm) {
+  paste0(
+    "o índice cheio veio **abaixo** da média dos núcleos, sinal de que o ",
+    "alívio do mês se concentrou em itens voláteis ou administrados e tende ",
+    "a não se sustentar"
+  )
+} else {
+  paste0(
+    "o índice cheio veio **acima** da média dos núcleos, indicando que a ",
+    "pressão do mês extrapolou o componente persistente da inflação"
+  )
+}
+
+diag_difusao <- if (difusao_mes$valor >= 50) {
+  paste0(
+    "a difusão em ", fmt_pct(difusao_mes$valor, 1L), " mostra a **maioria** ",
+    "dos subitens em alta"
+  )
+} else {
+  paste0(
+    "a difusão em ", fmt_pct(difusao_mes$valor, 1L), " mostra a **minoria** ",
+    "dos subitens em alta"
+  )
+}
 ```
 
-Este relatório consolidou quatro dimensões do IPCA de **`r ref_label`**:
+Este relatório consolidou as dimensões do IPCA de **`r ref_label`**:
 
 | Indicador | Valor |
 |---|---|
@@ -290,44 +760,91 @@ Este relatório consolidou quatro dimensões do IPCA de **`r ref_label`**:
 | Acumulado no ano | `r fmt_pct(ultimo_ano)` |
 | Acumulado 12 meses | `r fmt_pct(ultimo_12m)` |
 | Meta CMN `r meta_ano_atual` | `r fmt_pct(meta_valor)` ± 1,5 p.p. |
+| Média dos núcleos (mês) | `r fmt_pct(nucleo_mm)` |
+| Média dos núcleos (12m) | `r fmt_pct(nucleo_12m)` |
+| Serviços (mês) | `r fmt_pct(servicos$valor)` |
+| Índice de difusão | `r fmt_pct(difusao_mes$valor, 1L)` |
+| INPC (mês) | `r fmt_pct(inpc_mes$valor)` |
 | Maior contribuição do mês | `r maior_contrib$grupo` (`r fmt_sinal(maior_contrib$contribuicao[1])`) |
+| Subitem de maior impacto | `r item_alta$nome` (`r fmt_sinal(item_alta$contribuicao, 3L)`) |
 
-O acumulado em 12 meses está **`r status_banda`**. Do ponto de vista
-operacional, a trajetória do índice cheio reflete o balanço entre os
-grupos pressionados — especialmente Alimentação e Transportes, mais voláteis e
-sujeitos a choques de oferta — e os grupos mais inerciais, como Educação e
-Saúde, que tendem a reajustar contratos anualmente.
+O acumulado em 12 meses está **`r status_banda`**. No mês,
+`r diag_nucleo`; `r diag_difusao`.
 
+Do ponto de vista operacional, a trajetória do índice cheio reflete o balanço
+entre os grupos pressionados — especialmente Alimentação e Transportes, mais
+voláteis e sujeitos a choques de oferta — e os grupos mais inerciais, como
+Educação e Saúde, que reajustam contratos anualmente. A leitura conjunta dos
+núcleos, da difusão e da abertura por natureza do preço é o que permite
+distinguir desinflação efetiva de alívio circunstancial.
 
 ---
 
 ::: {.callout-note collapse="true"}
 ## Notas metodológicas e fontes
 
-- **Série 433 / SGS-BCB**: IPCA — variação percentual mensal, divulgado
-  pelo IBGE e disponibilizado no Sistema Gerenciador de Séries Temporais
-  do Banco Central do Brasil. Acesso via pacote `rbcb`.
-- **Série 13521 / SGS-BCB**: Meta de inflação fixada pelo CMN, em pontos
-  percentuais ao ano.
-- **Tabela 7060 / SIDRA-IBGE**: IPCA — variação mensal (variável 63) e
-  peso mensal (variável 66) para os 9 grupos de despesa (classificação c315).
-  Acesso via pacote `sidrar`.
-- **Fórmula de acumulado**: $\prod_{i}(1 + x_i/100) - 1$, sem aproximação
-  linear.
-- **Fórmula de contribuição**: $\text{contrib}_i = \text{variação}_i \times
-  \text{peso}_i / 100$; soma dos grupos ≈ IPCA cheio (diferenças por
-  arredondamento da API).
-- Relatório gerado em `r format(Sys.time(), "%d/%m/%Y às %H:%M")`.
+**IBGE — API SIDRA, tabela 7060** (pacote `sidrar`)
+
+- IPCA por grupo, subgrupo, item e subitem: variação mensal (variável 63) e
+  peso mensal (variável 66), classificação `c315`. O nível hierárquico é
+  inferido do prefixo numérico do rótulo (1 dígito = grupo, 2 = subgrupo,
+  4 = item, 7 = subitem).
+- IPCA por área: níveis territoriais `n7` (10 regiões metropolitanas) e `n6`
+  (6 municípios).
+
+**BCB — SGS** (pacote `rbcb`)
+
+| Série | Código |
+|---|---|
+| IPCA — variação mensal | 433 |
+| Meta de inflação (CMN) | 13521 |
+| INPC — variação mensal | 188 |
+| Índice de difusão do IPCA | 21379 |
+| Núcleo médias aparadas com suavização (MS) | 4466 |
+| Núcleo por exclusão EX0 | 11427 |
+| Núcleo por exclusão EX3 | 27839 |
+| Núcleo dupla ponderação (DP) | 16122 |
+| Núcleo percentil 55 (P55) | 28750 |
+| Bens não duráveis | 10841 |
+| Bens semiduráveis | 10842 |
+| Bens duráveis | 10843 |
+| Serviços | 10844 |
+| Preços livres | 11428 |
+| Preços monitorados | 4449 |
+
+Os cinco núcleos são os adotados pelo BCB desde o Estudo Especial 102/2021,
+que aposentou as medidas EX1, EX2 e as médias aparadas sem suavização.
+
+**BCB — expectativas de mercado** (boletim Focus, via `rbcb`): mediana das
+projeções para o IPCA mensal, base de cálculo 0 (todas as instituições que
+responderam nos últimos 30 dias). A projeção usada é a da última coleta
+anterior à divulgação do resultado.
+
+**Fórmulas**
+
+- Acumulado: $\prod_{i}(1 + x_i/100) - 1$, sem aproximação linear.
+- Contribuição: $\text{contrib}_i = \text{variação}_i \times \text{peso}_i /
+  100$; a soma dos grupos reproduz o índice cheio, com diferenças de
+  arredondamento da API.
+
+**Ressalva sobre a coleta**: a API do SGS trunca respostas muito longas e
+descarta silenciosamente as observações mais recentes. As séries são baixadas
+em janelas de 10 anos para evitar que o relatório fique defasado em um mês.
+
+Relatório gerado em `r format(Sys.time(), "%d/%m/%Y às %H:%M")`.
 :::
 
 ---
 
 ::: {style="font-size: 0.85em; color: #555; margin-top: 2em;"}
-**Boletim IPCA** — Semana de referência: `r format(Sys.Date(), "%Y/%m/%d")`
+**Boletim IPCA** — Mês de referência: `r ref_label`
 
 Elaborado por Raimundo Casé — economista | economistacase@gmail.com
 
-Fontes primárias: BCB — Banco Central do Brasil (Selic, Câmbio, IBC-Br) | IBGE — Instituto Brasileiro de Geografia e Estatística (IPCA).
+Fontes primárias: IBGE — Instituto Brasileiro de Geografia e Estatística
+(IPCA, INPC, tabela 7060 do SIDRA) | BCB — Banco Central do Brasil (SGS:
+metas, núcleos, difusão, classificação de preços; boletim Focus).
 
-*As análises e opiniões expressas neste boletim são de responsabilidade exclusiva do autor e não representam qualquer instituição.*
+*As análises e opiniões expressas neste boletim são de responsabilidade
+exclusiva do autor e não representam qualquer instituição.*
 :::

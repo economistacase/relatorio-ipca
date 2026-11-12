@@ -20,6 +20,7 @@ _freeze/            # cache de execução (freeze: auto)
 .quarto/            # cache interno do Quarto
 *.knit.md
 *.utf8.md
+*_cache/           # cache do knitr (quarto render --cache-refresh)
 # docs/ é rastreado — contém o HTML para GitHub Pages / Posit Connect
 
 # Arquivos temporários de render

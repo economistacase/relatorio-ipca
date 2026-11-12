@@ -558,3 +558,620 @@ salvar_grafico <- function(plot,
   message(sprintf("[salvar_grafico] Salvo: %s", caminho))
   invisible(caminho)
 }
+
+
+# =============================================================================
+# Visualizações das análises complementares
+#
+# Paleta categórica (séries simultâneas de identidades diferentes):
+#   #4954a8  azul     — irmão mais claro do azul-marinho da marca
+#   #c2410c  terracota
+#   #0d9488  teal
+#   #a21caf  magenta
+#
+# A paleta foi validada para daltonismo: a pior separação entre cores
+# adjacentes é ΔE 13,6 (deuteranopia) e 27,1 em visão normal, acima do piso
+# de 8. O azul-marinho da marca (#282f6b) é escuro demais para conviver com
+# outras cores em um mesmo gráfico (fica fora da banda de luminosidade), por
+# isso segue reservado para séries únicas e para o destaque — papel que já
+# cumpre nos gráficos das seções anteriores.
+#
+# Codificação por sinal (alta/baixa) continua usando o par azul-marinho /
+# âmbar já estabelecido no relatório, com cinza como neutro.
+# =============================================================================
+
+.PALETA_CATEGORICA <- c("#4954a8", "#c2410c", "#0d9488", "#a21caf")
+
+
+# -----------------------------------------------------------------------------
+#' Afasta verticalmente rótulos que se sobreporiam
+#'
+#' Quando duas séries terminam em valores próximos, seus rótulos diretos
+#' colidem e viram um borrão ilegível. Esta função desloca os rótulos o
+#' mínimo necessário para garantir um espaçamento vertical, preservando a
+#' ordem original dos valores — o rótulo continua apontando para a série
+#' certa, apenas deslocado.
+#'
+#' Evita a dependência de \pkg{ggrepel}, que não faz parte do projeto nem
+#' está instalada no runner de CI.
+#'
+#' @param valores \code{double} — posições verticais desejadas.
+#' @param gap Espaçamento mínimo entre rótulos, na unidade dos dados.
+#'
+#' @return \code{double} do mesmo comprimento e na mesma ordem de
+#'   \code{valores}, com as posições ajustadas.
+#'
+#' @keywords internal
+# -----------------------------------------------------------------------------
+.espacar_rotulos <- function(valores, gap) {
+  if (length(valores) <= 1L || !is.finite(gap) || gap <= 0) return(valores)
+
+  ordem     <- order(valores)
+  ajustados <- valores[ordem]
+
+  for (i in seq_along(ajustados)[-1L]) {
+    if (ajustados[i] - ajustados[i - 1L] < gap) {
+      ajustados[i] <- ajustados[i - 1L] + gap
+    }
+  }
+
+  # Recentra o bloco para não empurrar tudo para cima
+  deslocamento <- mean(ajustados) - mean(valores)
+  ajustados    <- ajustados - deslocamento
+
+  resultado        <- numeric(length(valores))
+  resultado[ordem] <- ajustados
+  resultado
+}
+
+
+# -----------------------------------------------------------------------------
+#' Gráfico divergente — itens de maior impacto no IPCA do mês
+#'
+#' Barras horizontais ordenadas por contribuição em pontos percentuais, com
+#' as pressões de alta (azul-marinho) acima e as de baixa (âmbar) abaixo de
+#' um eixo zero. Cada barra recebe rótulo direto com o valor, de modo que a
+#' identidade não dependa apenas da cor.
+#'
+#' @param df \code{tibble} \code{$combinado} devolvido por
+#'   \code{preparar_top_itens()}, com \code{nome} (\code{factor} já ordenado),
+#'   \code{contribuicao}, \code{variacao} e \code{direcao}.
+#'
+#' @return Objeto \code{ggplot}.
+#'
+#' @examples
+#' \dontrun{
+#'   top <- preparar_top_itens(coletar_ipca_c315("202510", "202610"))
+#'   grafico_top_itens(top$combinado)
+#' }
+# -----------------------------------------------------------------------------
+grafico_top_itens <- function(df) {
+  stopifnot(
+    is.data.frame(df),
+    all(c("nome", "contribuicao", "variacao") %in% names(df))
+  )
+
+  df_plot <- dplyr::mutate(df, positivo = contribuicao >= 0)
+
+  folga <- max(abs(df_plot$contribuicao), na.rm = TRUE) * 0.45
+
+  ggplot2::ggplot(
+    df_plot,
+    ggplot2::aes(x = contribuicao, y = nome, fill = positivo)
+  ) +
+    ggplot2::geom_col(width = 0.68) +
+    ggplot2::geom_vline(xintercept = 0, colour = .COR_CINZA, linewidth = 0.4) +
+    ggplot2::geom_text(
+      ggplot2::aes(
+        label = sprintf("%+.3f p.p. (%+.2f%%)", contribuicao, variacao),
+        hjust = ifelse(positivo, -0.08, 1.08)
+      ),
+      size     = 2.5,
+      colour   = .COR_CINZA,
+      fontface = "bold"
+    ) +
+    ggplot2::scale_fill_manual(
+      values = c("TRUE" = .COR_PRIMARIA, "FALSE" = .COR_SECUNDARIA),
+      guide  = "none"
+    ) +
+    ggplot2::scale_x_continuous(
+      labels = scales::label_number(accuracy = 0.01),
+      expand = ggplot2::expansion(mult = c(0.02, 0.02))
+    ) +
+    ggplot2::coord_cartesian(xlim = c(-folga, folga) +
+                               range(df_plot$contribuicao, na.rm = TRUE)) +
+    ggplot2::labs(
+      x = "Contribuição ao IPCA do mês (p.p.)",
+      y = NULL
+    ) +
+    .tema_base() +
+    ggplot2::theme(
+      panel.grid.major.y = ggplot2::element_blank(),
+      axis.text.y        = ggplot2::element_text(size = 8.5)
+    )
+}
+
+
+# -----------------------------------------------------------------------------
+#' Gráfico de linhas — núcleos de inflação acumulados em 12 meses
+#'
+#' Os cinco núcleos aparecem em cinza, recessivos, e a média deles em
+#' azul-marinho com traço espesso — o mesmo recurso de destaque usado no
+#' gráfico sazonal. Isso evita uma paleta de seis cores para séries que o
+#' leitor consulta como um feixe, e não individualmente.
+#'
+#' Uma faixa de referência marca o intervalo de tolerância da meta, para
+#' leitura imediata de quanto o miolo da inflação está distante do alvo.
+#'
+#' @param df_series \code{tibble} \code{$series} de \code{preparar_nucleos()},
+#'   com \code{serie}, \code{data} e \code{acum_12m}.
+#' @param meta_valor Meta central vigente, em p.p. \code{NA} omite a faixa.
+#' @param anos_recentes Quantos anos exibir. Padrão: 6.
+#'
+#' @return Objeto \code{ggplot}.
+#'
+#' @examples
+#' \dontrun{
+#'   nuc <- preparar_nucleos(coletar_series_sgs(NUCLEOS_SGS))
+#'   grafico_nucleos(nuc$series, meta_valor = 3)
+#' }
+# -----------------------------------------------------------------------------
+grafico_nucleos <- function(df_series, meta_valor = NA_real_,
+                            anos_recentes = 6L) {
+  stopifnot(
+    is.data.frame(df_series),
+    all(c("serie", "data", "acum_12m") %in% names(df_series))
+  )
+
+  data_max   <- max(df_series$data, na.rm = TRUE)
+  data_corte <- data_max %m-% months(12L * as.integer(anos_recentes))
+
+  df_plot <- df_series |>
+    dplyr::filter(!is.na(acum_12m), data >= data_corte) |>
+    dplyr::mutate(eh_media = serie == "Média dos núcleos")
+
+  individuais <- dplyr::filter(df_plot, !eh_media)
+  media       <- dplyr::filter(df_plot,  eh_media)
+
+  rotulo_final <- media |>
+    dplyr::slice_max(data, n = 1L, with_ties = FALSE)
+
+  g <- ggplot2::ggplot()
+
+  if (!is.na(meta_valor)) {
+    g <- g +
+      ggplot2::annotate(
+        "rect",
+        xmin = min(df_plot$data), xmax = max(df_plot$data),
+        ymin = meta_valor - 1.5,  ymax = meta_valor + 1.5,
+        fill = .COR_TERCIARIA, alpha = 0.08
+      ) +
+      ggplot2::geom_hline(
+        yintercept = meta_valor,
+        colour     = .COR_TERCIARIA,
+        linetype   = "dashed",
+        linewidth  = 0.5
+      )
+  }
+
+  g +
+    ggplot2::geom_line(
+      data = individuais,
+      ggplot2::aes(x = data, y = acum_12m, group = serie),
+      colour    = .COR_CINZA,
+      alpha     = 0.45,
+      linewidth = 0.5
+    ) +
+    ggplot2::geom_line(
+      data = media,
+      ggplot2::aes(x = data, y = acum_12m),
+      colour    = .COR_PRIMARIA,
+      linewidth = 1.2
+    ) +
+    ggplot2::geom_point(
+      data   = rotulo_final,
+      ggplot2::aes(x = data, y = acum_12m),
+      colour = .COR_PRIMARIA,
+      size   = 2.2
+    ) +
+    ggplot2::geom_text(
+      data = rotulo_final,
+      ggplot2::aes(x = data, y = acum_12m,
+                   label = sprintf("%.2f%%", acum_12m)),
+      hjust    = -0.18,
+      size     = 3,
+      colour   = .COR_PRIMARIA,
+      fontface = "bold"
+    ) +
+    ggplot2::scale_x_date(
+      date_breaks = "1 year",
+      date_labels = "%Y",
+      expand      = ggplot2::expansion(mult = c(0.02, 0.10))
+    ) +
+    ggplot2::scale_y_continuous(
+      labels = scales::label_number(accuracy = 0.1, suffix = "%")
+    ) +
+    ggplot2::labs(
+      x       = NULL,
+      y       = "Acumulado em 12 meses",
+      caption = paste0(
+        "Linhas cinza: os cinco núcleos (MS, EX0, EX3, DP, P55). ",
+        "Linha azul: média simples dos cinco."
+      )
+    ) +
+    .tema_base()
+}
+
+
+# -----------------------------------------------------------------------------
+#' Gráfico de linhas — abertura do IPCA por natureza do bem
+#'
+#' Compara, no acumulado em 12 meses, as quatro categorias em que o BCB
+#' decompõe os preços do IPCA: bens não duráveis, semiduráveis, duráveis e
+#' serviços. Usa a paleta categórica validada, com legenda e rótulo direto
+#' no fim de cada linha — identidade nunca depende só da cor.
+#'
+#' @param df \code{tibble} longo com \code{serie}, \code{data} e
+#'   \code{acum_12m}.
+#' @param anos_recentes Quantos anos exibir. Padrão: 6.
+#'
+#' @return Objeto \code{ggplot}.
+#'
+#' @examples
+#' \dontrun{
+#'   cl <- acumular_12m_por_serie(coletar_series_sgs(CLASSIFICACAO_SGS))
+#'   grafico_classificacao(cl)
+#' }
+# -----------------------------------------------------------------------------
+grafico_classificacao <- function(df, anos_recentes = 6L) {
+  stopifnot(
+    is.data.frame(df),
+    all(c("serie", "data", "acum_12m") %in% names(df))
+  )
+
+  data_max   <- max(df$data, na.rm = TRUE)
+  data_corte <- data_max %m-% months(12L * as.integer(anos_recentes))
+
+  df_plot <- dplyr::filter(df, !is.na(acum_12m), data >= data_corte)
+
+  gap <- diff(range(df_plot$acum_12m, na.rm = TRUE)) * 0.045
+
+  finais <- df_plot |>
+    dplyr::group_by(serie) |>
+    dplyr::slice_max(data, n = 1L, with_ties = FALSE) |>
+    dplyr::ungroup() |>
+    dplyr::mutate(y_rotulo = .espacar_rotulos(acum_12m, gap))
+
+  ggplot2::ggplot(
+    df_plot,
+    ggplot2::aes(x = data, y = acum_12m, colour = serie)
+  ) +
+    ggplot2::geom_hline(yintercept = 0, colour = .COR_CINZA,
+                        linewidth = 0.3) +
+    ggplot2::geom_line(linewidth = 0.85) +
+    ggplot2::geom_point(data = finais, size = 2) +
+    ggplot2::geom_text(
+      data = finais,
+      ggplot2::aes(y = y_rotulo, label = sprintf("%.1f%%", acum_12m)),
+      hjust    = -0.22,
+      size     = 2.8,
+      fontface = "bold",
+      show.legend = FALSE
+    ) +
+    ggplot2::scale_colour_manual(values = .PALETA_CATEGORICA, name = NULL) +
+    ggplot2::scale_x_date(
+      date_breaks = "1 year",
+      date_labels = "%Y",
+      expand      = ggplot2::expansion(mult = c(0.02, 0.12))
+    ) +
+    ggplot2::scale_y_continuous(
+      labels = scales::label_number(accuracy = 1, suffix = "%")
+    ) +
+    ggplot2::labs(x = NULL, y = "Acumulado em 12 meses") +
+    .tema_base() +
+    ggplot2::theme(
+      legend.position = "bottom",
+      legend.text     = ggplot2::element_text(size = 8.5)
+    )
+}
+
+
+# -----------------------------------------------------------------------------
+#' Gráfico de linha — índice de difusão do IPCA
+#'
+#' O índice de difusão mede a proporção de subitens com variação positiva no
+#' mês. Serve para distinguir inflação concentrada em poucos itens de
+#' inflação disseminada: um índice cheio baixo com difusão alta indica que o
+#' alívio veio de poucos preços muito negativos, não de arrefecimento geral.
+#'
+#' A linha de referência em 50% separa os regimes — acima, a maioria dos
+#' preços sobe.
+#'
+#' @param df \code{tibble} com \code{data} e \code{valor} (difusão em %).
+#' @param anos_recentes Quantos anos exibir. Padrão: 6.
+#'
+#' @return Objeto \code{ggplot}.
+#'
+#' @examples
+#' \dontrun{
+#'   dif <- coletar_series_sgs(c("Difusão" = DIFUSAO_SGS))
+#'   grafico_difusao(dif)
+#' }
+# -----------------------------------------------------------------------------
+grafico_difusao <- function(df, anos_recentes = 6L) {
+  stopifnot(
+    is.data.frame(df),
+    all(c("data", "valor") %in% names(df))
+  )
+
+  data_max   <- max(df$data, na.rm = TRUE)
+  data_corte <- data_max %m-% months(12L * as.integer(anos_recentes))
+
+  df_plot <- dplyr::filter(df, !is.na(valor), data >= data_corte)
+
+  final <- dplyr::slice_max(df_plot, data, n = 1L, with_ties = FALSE)
+
+  ggplot2::ggplot(df_plot, ggplot2::aes(x = data, y = valor)) +
+    ggplot2::geom_hline(
+      yintercept = 50,
+      colour     = .COR_CINZA,
+      linetype   = "dashed",
+      linewidth  = 0.5
+    ) +
+    ggplot2::geom_line(colour = .COR_PRIMARIA, linewidth = 0.9) +
+    ggplot2::geom_point(data = final, colour = .COR_PRIMARIA, size = 2.2) +
+    ggplot2::geom_text(
+      data = final,
+      ggplot2::aes(label = sprintf("%.1f%%", valor)),
+      hjust    = -0.2,
+      size     = 3,
+      colour   = .COR_PRIMARIA,
+      fontface = "bold"
+    ) +
+    ggplot2::scale_x_date(
+      date_breaks = "1 year",
+      date_labels = "%Y",
+      expand      = ggplot2::expansion(mult = c(0.02, 0.10))
+    ) +
+    ggplot2::scale_y_continuous(
+      labels = scales::label_number(accuracy = 1, suffix = "%")
+    ) +
+    ggplot2::labs(
+      x       = NULL,
+      y       = "Subitens com variação positiva",
+      caption = "Linha tracejada em 50%: metade dos subitens subindo."
+    ) +
+    .tema_base()
+}
+
+
+# -----------------------------------------------------------------------------
+#' Gráfico de barras — surpresa inflacionária frente ao Focus
+#'
+#' Cada barra é a diferença, em pontos percentuais, entre o IPCA divulgado e
+#' a mediana projetada pelo mercado na última coleta do Focus anterior à
+#' divulgação. Barras acima de zero (azul-marinho) indicam inflação acima do
+#' esperado; abaixo (âmbar), abaixo do esperado.
+#'
+#' @param df \code{tibble} devolvido por \code{preparar_surpresa_focus()}.
+#' @param n_meses Quantos meses exibir. Padrão: 12.
+#'
+#' @return Objeto \code{ggplot}.
+#'
+#' @examples
+#' \dontrun{
+#'   s <- preparar_surpresa_focus(coletar_focus_ipca(), coletar_ipca_mensal())
+#'   grafico_surpresa(s)
+#' }
+# -----------------------------------------------------------------------------
+grafico_surpresa <- function(df, n_meses = 12L) {
+  stopifnot(
+    is.data.frame(df),
+    all(c("data", "surpresa") %in% names(df))
+  )
+
+  df_plot <- df |>
+    dplyr::arrange(data) |>
+    dplyr::slice_tail(n = as.integer(n_meses)) |>
+    dplyr::mutate(positivo = surpresa >= 0)
+
+  amplitude <- diff(range(df_plot$surpresa, na.rm = TRUE))
+  pad       <- max(amplitude * 0.22, 0.03)
+
+  ggplot2::ggplot(
+    df_plot,
+    ggplot2::aes(x = data, y = surpresa, fill = positivo)
+  ) +
+    ggplot2::geom_col(width = 20) +
+    ggplot2::geom_hline(yintercept = 0, colour = .COR_CINZA,
+                        linewidth = 0.4) +
+    ggplot2::geom_text(
+      ggplot2::aes(
+        label = sprintf("%+.2f", surpresa),
+        vjust = ifelse(positivo, -0.45, 1.45)
+      ),
+      size     = 2.6,
+      colour   = .COR_CINZA,
+      fontface = "bold"
+    ) +
+    ggplot2::scale_fill_manual(
+      values = c("TRUE" = .COR_PRIMARIA, "FALSE" = .COR_SECUNDARIA),
+      guide  = "none"
+    ) +
+    ggplot2::scale_x_date(
+      date_breaks = "2 months",
+      date_labels = "%b\n%Y",
+      expand      = ggplot2::expansion(add = 18)
+    ) +
+    ggplot2::scale_y_continuous(
+      labels = scales::label_number(accuracy = 0.01)
+    ) +
+    ggplot2::coord_cartesian(
+      ylim = range(df_plot$surpresa, na.rm = TRUE) + c(-pad, pad)
+    ) +
+    ggplot2::labs(
+      x       = NULL,
+      y       = "Realizado − projetado (p.p.)",
+      caption = paste0(
+        "Projeção: mediana do Focus na última coleta anterior à divulgação. ",
+        "Acima de zero, inflação surpreendeu para cima."
+      )
+    ) +
+    .tema_base()
+}
+
+
+# -----------------------------------------------------------------------------
+#' Gráfico de barras — IPCA do mês nas 16 áreas pesquisadas
+#'
+#' Ranking horizontal das 10 regiões metropolitanas e 6 municípios em que o
+#' IBGE apura o IPCA, com codificação por sinal e rótulo direto em cada
+#' barra. A dispersão entre áreas revela quanto do resultado nacional é
+#' choque local (tarifa de energia, transporte urbano) e quanto é geral.
+#'
+#' @param df \code{tibble} devolvido por \code{preparar_areas()}, com
+#'   \code{area} (\code{factor} ordenado), \code{tipo} e \code{variacao}.
+#' @param ipca_brasil Variação do índice cheio no mês, em %, para traçar a
+#'   linha de referência nacional. \code{NA} omite a linha.
+#'
+#' @return Objeto \code{ggplot}.
+#'
+#' @examples
+#' \dontrun{
+#'   a <- preparar_areas(coletar_ipca_areas("202610", "202610"))
+#'   grafico_areas(a, ipca_brasil = 0.14)
+#' }
+# -----------------------------------------------------------------------------
+grafico_areas <- function(df, ipca_brasil = NA_real_) {
+  stopifnot(
+    is.data.frame(df),
+    all(c("area", "variacao") %in% names(df))
+  )
+
+  df_plot <- dplyr::mutate(df, positivo = variacao >= 0)
+
+  folga <- max(abs(df_plot$variacao), na.rm = TRUE) * 0.30
+
+  g <- ggplot2::ggplot(
+    df_plot,
+    ggplot2::aes(x = variacao, y = area, fill = positivo)
+  ) +
+    ggplot2::geom_col(width = 0.68)
+
+  if (!is.na(ipca_brasil)) {
+    g <- g +
+      ggplot2::geom_vline(
+        xintercept = ipca_brasil,
+        colour     = .COR_TERCIARIA,
+        linetype   = "dashed",
+        linewidth  = 0.6
+      )
+  }
+
+  g +
+    ggplot2::geom_vline(xintercept = 0, colour = .COR_CINZA,
+                        linewidth = 0.4) +
+    ggplot2::geom_text(
+      ggplot2::aes(
+        label = sprintf("%+.2f%%", variacao),
+        hjust = ifelse(positivo, -0.12, 1.12)
+      ),
+      size     = 2.6,
+      colour   = .COR_CINZA,
+      fontface = "bold"
+    ) +
+    ggplot2::scale_fill_manual(
+      values = c("TRUE" = .COR_PRIMARIA, "FALSE" = .COR_SECUNDARIA),
+      guide  = "none"
+    ) +
+    ggplot2::scale_x_continuous(
+      labels = scales::label_number(accuracy = 0.1, suffix = "%")
+    ) +
+    ggplot2::coord_cartesian(
+      xlim = range(df_plot$variacao, na.rm = TRUE) + c(-folga, folga)
+    ) +
+    ggplot2::labs(
+      x       = "Variação no mês",
+      y       = NULL,
+      caption = if (is.na(ipca_brasil)) NULL else
+        "Linha verde tracejada: IPCA do Brasil no mês."
+    ) +
+    .tema_base() +
+    ggplot2::theme(
+      panel.grid.major.y = ggplot2::element_blank(),
+      axis.text.y        = ggplot2::element_text(size = 8.5)
+    )
+}
+
+
+# -----------------------------------------------------------------------------
+#' Gráfico de linhas — alimentação dentro e fora do domicílio
+#'
+#' Duas séries em acumulado de 12 meses, com legenda e rótulo direto. A
+#' alimentação no domicílio responde a safra, clima e câmbio; a de fora do
+#' domicílio é muito mais inercial, puxada por salários e aluguel. Quando as
+#' duas divergem, o choque é de oferta; quando convergem, há repasse.
+#'
+#' @param df \code{tibble} com \code{data}, \code{nome} e \code{acum_12m}.
+#' @param anos_recentes Quantos anos exibir. Padrão: 5.
+#'
+#' @return Objeto \code{ggplot}.
+#'
+#' @examples
+#' \dontrun{
+#'   al <- preparar_alimentacao(h) |>
+#'     acumular_12m_por_serie(col_grupo = "nome", col_valor = "variacao")
+#'   grafico_alimentacao(al)
+#' }
+# -----------------------------------------------------------------------------
+grafico_alimentacao <- function(df, anos_recentes = 5L) {
+  stopifnot(
+    is.data.frame(df),
+    all(c("data", "nome", "acum_12m") %in% names(df))
+  )
+
+  data_max   <- max(df$data, na.rm = TRUE)
+  data_corte <- data_max %m-% months(12L * as.integer(anos_recentes))
+
+  df_plot <- dplyr::filter(df, !is.na(acum_12m), data >= data_corte)
+
+  gap <- diff(range(df_plot$acum_12m, na.rm = TRUE)) * 0.045
+
+  finais <- df_plot |>
+    dplyr::group_by(nome) |>
+    dplyr::slice_max(data, n = 1L, with_ties = FALSE) |>
+    dplyr::ungroup() |>
+    dplyr::mutate(y_rotulo = .espacar_rotulos(acum_12m, gap))
+
+  ggplot2::ggplot(
+    df_plot,
+    ggplot2::aes(x = data, y = acum_12m, colour = nome)
+  ) +
+    ggplot2::geom_hline(yintercept = 0, colour = .COR_CINZA,
+                        linewidth = 0.3) +
+    ggplot2::geom_line(linewidth = 0.95) +
+    ggplot2::geom_point(data = finais, size = 2) +
+    ggplot2::geom_text(
+      data = finais,
+      ggplot2::aes(y = y_rotulo, label = sprintf("%.1f%%", acum_12m)),
+      hjust       = -0.22,
+      size        = 2.8,
+      fontface    = "bold",
+      show.legend = FALSE
+    ) +
+    ggplot2::scale_colour_manual(
+      values = .PALETA_CATEGORICA[1:2],
+      name   = NULL
+    ) +
+    ggplot2::scale_x_date(
+      date_breaks = "1 year",
+      date_labels = "%Y",
+      expand      = ggplot2::expansion(mult = c(0.02, 0.12))
+    ) +
+    ggplot2::scale_y_continuous(
+      labels = scales::label_number(accuracy = 1, suffix = "%")
+    ) +
+    ggplot2::labs(x = NULL, y = "Acumulado em 12 meses") +
+    .tema_base() +
+    ggplot2::theme(legend.position = "bottom")
+}
